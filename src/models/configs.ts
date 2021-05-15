@@ -1,5 +1,5 @@
 export enum UI_FROM_MODE {
-    EDIT,
-    NEW,
-    VIEW
+    EDIT = "EDIT",
+    NEW = "NEW",
+    VIEW = "VIEW"
 }

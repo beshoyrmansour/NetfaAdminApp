@@ -31,10 +31,10 @@ import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 // import FilterListIcon from '@material-ui/icons/FilterList';
 
-import { Product, ProductsActionTypes } from '../models/Products';
-import ProductForm from '../components/ProductForm';
-import { UI_FROM_MODE } from '../models/configs';
-import { AppState } from '../redux/store';
+import { TProduct, ProductsActionTypes } from '../../models/Products';
+import ProductForm from '../../components/ProductForm';
+import { UI_FROM_MODE } from '../../models/configs';
+import { AppState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 
 // interface Product {
@@ -79,7 +79,7 @@ type Order = 'asc' | 'desc';
 
 interface HeadCell {
     disablePadding: boolean;
-    id: keyof Product;
+    id: keyof TProduct;
     label: string;
     numeric: boolean;
 }
@@ -93,7 +93,7 @@ const headCells: HeadCell[] = [
 interface EnhancedTableProps {
     classes: ReturnType<typeof useStyles>;
     numSelected: number;
-    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Product) => void;
+    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof TProduct) => void;
     onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
     order: Order;
     orderBy: string;
@@ -102,7 +102,7 @@ interface EnhancedTableProps {
 
 function EnhancedTableHead(props: EnhancedTableProps) {
     const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-    const createSortHandler = (property: keyof Product) => (event: React.MouseEvent<unknown>) => {
+    const createSortHandler = (property: keyof TProduct) => (event: React.MouseEvent<unknown>) => {
         onRequestSort(event, property);
     };
 
@@ -204,7 +204,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
                 </Typography>
             ) : (
                 <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-                    جدول المنتجات
+                    مجموعات المنتجات
                 </Typography>
             )}
             {numSelected > 0 ? (
@@ -272,12 +272,12 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-export default function Products() {
+export default function BundlesProducts() {
     const classes = useStyles();
     const dispatch = useDispatch();
 
     const [order, setOrder] = React.useState<Order>('asc');
-    const [orderBy, setOrderBy] = React.useState<keyof Product>('arName');
+    const [orderBy, setOrderBy] = React.useState<keyof TProduct>('arName');
     const [selected, setSelected] = React.useState<string[]>([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
@@ -292,7 +292,7 @@ export default function Products() {
         setOpenProductDetails((prevOpenProductDetails) => !prevOpenProductDetails)
     }
 
-    const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof Product) => {
+    const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof TProduct) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
@@ -300,14 +300,14 @@ export default function Products() {
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            const newSelected = products.map((n: Product) => n.arName);
+            const newSelected = products.map((n: TProduct) => n.arName);
             setSelected(newSelected);
             return;
         }
         setSelected([]);
     };
 
-    const handleClick = (event: React.MouseEvent<unknown>, row: Product) => {
+    const handleClick = (event: React.MouseEvent<unknown>, row: TProduct) => {
         const selectedIndex = selected.indexOf(row.arName);
         let newSelected: string[] = [];
         if (selectedIndex === -1) {
@@ -334,7 +334,7 @@ export default function Products() {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-    const handleOpenProductFormOnClick = (product: Product, mode: UI_FROM_MODE) => {
+    const handleOpenProductFormOnClick = (product: TProduct, mode: UI_FROM_MODE) => {
         console.log({ handleViewProductDetailsOnClick: product });
         dispatch({
             type: ProductsActionTypes.SET_SELECTED_PRODUCT,
@@ -345,7 +345,7 @@ export default function Products() {
     };
 
 
-    const isSelected = (row: Product) => selected.indexOf(row.arName) !== -1;
+    const isSelected = (row: TProduct) => selected.indexOf(row.arName) !== -1;
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, products.length - page * rowsPerPage);
     React.useEffect(() => {
@@ -379,7 +379,7 @@ export default function Products() {
                                     <TableBody>
                                         {/* {stableSort(products, getComparator(order, orderBy))
                                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
-                                        {products.map((row: Product, index: number) => {
+                                        {products.map((row: TProduct, index: number) => {
                                             const isItemSelected = isSelected(row);
                                             const labelId = `enhanced-table-checkbox-${index}`;
 

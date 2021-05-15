@@ -1,52 +1,23 @@
-export type quantity = {
-    quantityId?: number;
-    quantityName: string;
-    value?: number;
-    id?: string;
-};
+import { AxiosResponse } from "axios";
 
-export type Product = {
+export type TProduct = {
     enName: string;
     arName: string;
     thumbnailBase64: string;
-    unitPrice: number;
-    mainImageId: number;
-    categoryId: number;
-    defaultQuantityId: number;
+    unitPrice: number | null;
+    mainImageId?: number | null;
+    categoryId: number | null;
+    defaultQuantityId: number | null;
     enDescription: string;
     arDescription: string;
     isAvailableForPurchase: boolean;
-    id?: number;
-    addedDate?: Date;
-    modifiedDate?: Date;
+    id?: number | null;
+    addedDate?: string;
+    modifiedDate?: string;
     quantityEnName?: string;
     quantityValue?: number;
     quantityArName?: string;
-};
-// enName:string;
-// arName:string;
-// thumbnailBase64:string;
-// unitPrice:number;
-// isAvailableForPurchase:boolean;
-// categoryId:long;
-// enDescription:string;
-// arDescription:string;
-// mainImageId:number;
-// mainImage:string;
-
-// [Required] public string EnName { get; set; }
-// [Required] public string ArName { get; set; }
-// [Required] public string ThumbnailBase64 { get; set; }
-// [Required] public decimal UnitPrice { get; set; }
-// [DefaultValue(true)] public bool IsAvailableForPurchase { get; set; }
-// public long CategoryId { get; set; }
-// public string EnDescription { get; set; }
-// public string ArDescription { get; set; }
-// public long MainImageId { get; set; }
-// public virtual Image MainImage { get; set; }
-
-
-
+}
 
 // Type of Actions allowed
 export enum ProductsActionTypes {
@@ -65,15 +36,17 @@ export type ProductsActionType = {
 };
 
 // Action Generator for ADD
-export const addProductType = (product: Product) => {
-    return {
-        type: ProductsActionTypes.ADD_PRODUCT,
-        payload: product
-    };
-};
+export interface IGetSingleOrderItemsProductsReq {
+    (
+        AvailableForPurchaseOnly?: boolean,
+        PageNumber?: number,
+        PageSize?: number,
+        OrderBy?: string,
+    ): Promise<AxiosResponse>
+}
 
 // Action Generator for Remove
-export const removeProductType = (product: Product) => {
+export const removeProductType = (product: TProduct) => {
     return {
         type: ProductsActionTypes.REMOVE_PRODUCT,
         payload: product
@@ -82,8 +55,8 @@ export const removeProductType = (product: Product) => {
 
 
 export type ProductsReducerType = {
-    products: Product[],
-    selectedProduct: Product | {},
+    products: TProduct[],
+    selectedProduct: TProduct | {},
     isLoadingSelectedProduct: boolean,
     isLoadingProducts: boolean,
 };

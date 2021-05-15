@@ -10,9 +10,10 @@ import Container from '@material-ui/core/Container';
 
 import './App.css';
 import Header from './components/Header';
-import Products from './pages/Products';
+import Products from './pages/products/Products';
 import Orders from './pages/Orders';
 import Users from './pages/Users';
+import Settings from './pages/Settings';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -62,20 +63,23 @@ function App() {
 
   return (
     <StylesProvider jss={jss}>
-        <div className="App">
-          <Header value={value} handleChange={handleChange} />
-          <Container maxWidth="lg">
-            <TabPanel value={value} index={0}>
-              <Products />
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-              <Orders />
-            </TabPanel>
-            <TabPanel value={value} index={2}>
-              <Users />
-            </TabPanel>
-          </Container>
-        </div>
+      <div className="App">
+        <Header value={value} handleChange={handleChange} />
+        <Container maxWidth="lg">
+          <TabPanel value={value} index={0}>
+            <Products />
+          </TabPanel>
+          <TabPanel value={value} index={1}>
+            <Orders />
+          </TabPanel>
+          <TabPanel value={value} index={2}>
+            <Users />
+          </TabPanel>
+          <TabPanel value={value} index={3}>
+            <Settings />
+          </TabPanel>
+        </Container>
+      </div>
     </StylesProvider>
   );
 }

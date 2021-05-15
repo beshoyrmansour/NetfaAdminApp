@@ -8,7 +8,6 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import CardMedia from '@material-ui/core/CardMedia';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -20,6 +19,11 @@ import { ProductsActionTypes } from '../models/Products';
 import { UI_FROM_MODE } from '../models/configs';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../redux/store';
+import { createOrUpdateSingleItemProduct, getSingleOrderItemsProducts } from '../redux/actions/productsActions';
+import { TCategory } from '../models/Categories';
+import { getCategoriesList } from '../redux/actions/categoriesActions';
+import { getQuantitiesList } from '../redux/actions/settingActions';
+import { TQuantity } from '../models/Quantity';
 
 interface Props {
     toggleOpenProductForm: () => void;
@@ -60,6 +64,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     uploadBlock: {
         display: 'flex',
+        marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(3),
     },
 
     uploadButtonBlock: {
@@ -71,173 +77,248 @@ const useStyles = makeStyles((theme: Theme) => ({
         marginBottom: theme.spacing(2)
     },
     cover: {
-        width: 150,
-        height: 150,
+        height: 230,
+        maxWidth: 360,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundSize: 'contain',
+        textAlign: 'center'
     },
     paddingRight_1: { paddingRight: theme.spacing(1) },
+    saveButton: { marginBottom: theme.spacing(1) },
 }));
 
 const ProductForm = (props: Props) => {
     const classes = useStyles();
     const dispatch = useDispatch();
-    
+    const { toggleOpenProductForm, mode } = props
     const selectedProduct = useSelector((state: AppState) => state.products.selectedProduct);
 
-    const { toggleOpenProductForm, mode } = props
-    const [quantityId, setQuantityId] = React.useState('0');
-    const [description, setDescription] = React.useState('');
-    const [name, setName] = React.useState('');
-    const [isVisable, setIsVisable] = React.useState(false);
-    const [isValid, setIsValid] = React.useState(false);
-    const [thumbnailLink, setThumbnailLink] = React.useState('');
-    const [mainImageLink, setmainImageLink] = React.useState('');
-    const [unitPrice, setUnitPrice] = React.useState('0.0');
+    // const [mainImageId, setMainImageId] = React.useState(0);
+    const [enName, setEnName] = React.useState<string>("");
+    const [arName, setArName] = React.useState<string>("");
+    const [thumbnailBase64, setThumbnailBase64] = React.useState<string>("");
+    const [unitPrice, setUnitPrice] = React.useState<number | null>(null);
+    const [categoryId, setCategoryId] = React.useState<number | null>(null);
+    const [defaultQuantityId, setDefaultQuantityId] = React.useState<number | null>(null);
+    const [enDescription, setEnDescription] = React.useState<string>("");
+    const [arDescription, setArDescription] = React.useState<string>("");
+    const [isAvailableForPurchase, setIsAvailableForPurchase] = React.useState<boolean>(true);
+    const [thumbnailLink, setThumbnailLink] = React.useState<string>('');
+    const [mainImageLink, setMainImageLink] = React.useState<string>('');
+    const [isFormValid, setIsFormValid] = React.useState<boolean>(false);
+    const [thumbnailFile, setThumbnailFile] = React.useState<any>(null);
+    const [mainImageFile, setMainImageFile] = React.useState<any>(null);
+    const [thumbnailErrorText, setThumbnailErrorText] = React.useState<string>('');
+    const [mainImageErrorText, setMainImageErrorText] = React.useState<string>('');
+    const [categoriesList, setCategoriesList] = React.useState([]);
+    const [quantitiesList, setQuantitiesList] = React.useState([]);
 
-
-    const handleIsVisableChange = (event: React.ChangeEvent<{ checked: boolean }>) => {
-        setIsVisable(event.target.checked);
-    };
-
-    const handleNameChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setName(event.target.value as string);
-    };
-
-    const handleDescriptionChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setDescription(event.target.value as string);
-    };
-    const handlePriceChange = (e: React.ChangeEvent<{ value: string }>) => {
-        const rx_live = /^[+-]?\d*(?:[.]\d*)?$/;
-        if (rx_live.test(e.target.value))
-            setUnitPrice(e.target.value || '0.0')
+    const handleEnNameChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        setEnName(event.target.value as string)
     }
+    const handleArNameChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        setArName(event.target.value as string)
+    }
+    const handleUnitPriceChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        const rx_live = /^[+-]?\d*(?:[.]\d*)?$/;
+        if (rx_live.test(event.target.value as string))
+            setUnitPrice(event.target.value as number || 0)
+    }
+    const handleCategoryIdChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        setCategoryId(event.target.value as number)
+    }
+    const handleDefaultQuantityIdChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        setDefaultQuantityId(event.target.value as number)
+    }
+    const handleEnDescriptionChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        setEnDescription(event.target.value as string)
+    }
+    const handleArDescriptionChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        setArDescription(event.target.value as string)
+    }
+    const handleIsAvailableForPurchaseChange = (event: React.ChangeEvent<{ checked: boolean }>) => {
+        setIsAvailableForPurchase(event.target.checked)
+    }
+    const _handleReaderLoaded = (readerEvt: any) => {
+        let binaryString = readerEvt.target.result;
+        setThumbnailBase64(btoa(binaryString))
+    }
+    const handleThumbnailLinkChange = (event: any) => {
+        let reader = new FileReader();
+        if (event.target.files.length && event.target.files[0].size < 5242880) {
+            const imageFileURL = URL.createObjectURL(event.target.files[0]);
+            const reader = new FileReader();
+            reader.onload = _handleReaderLoaded
+            reader.readAsBinaryString(event.target.files[0])
 
-    const handlequantityIdChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setQuantityId(event.target.value as string);
-    };
-    const handleThumbnailImageChange = (event: any) => {
-        if (event.target.files.length) {
-            const imageFile = URL.createObjectURL(event.target.files[0])
-            setThumbnailLink(imageFile);
+            console.log({ reader: reader.result });
+
+            setThumbnailBase64(reader.result as string)
+            setThumbnailLink(imageFileURL);
+            setThumbnailFile(event.target.files[0]);
+            setThumbnailErrorText("");
+        } else {
+            setThumbnailErrorText("يجب أن يكون حجم الملف أقل من 5 ميغابايت ويمكن أن يكون التنسيق بتنسيق JPG أو PNG. ");
+            setThumbnailLink("");
+
         };
     };
-    const handleMainImageChange = (event: any) => {
-        if (event.target.files.length) {
-            const imageFile = URL.createObjectURL(event.target.files[0]);
-            setmainImageLink(imageFile);
+    const handleMainImageLinkChange = (event: any) => {
+        if (event.target.files.length && event.target.files[0].size < 5242880) {
+            const imageFileURL = URL.createObjectURL(event.target.files[0]);
+            setMainImageLink(imageFileURL);
+            setMainImageFile(event.target.files[0]);
+            setMainImageErrorText("");
+        } else {
+            setMainImageErrorText("يجب أن يكون حجم الملف أقل من 5 ميغابايت ويمكن أن يكون التنسيق بتنسيق JPG أو PNG. ");
+            setMainImageLink("");
         };
     };
 
     React.useEffect(() => {
-        console.log({
-            quantityId,
-            description,
-            name,
-            isVisable,
-            thumbnailLink,
-            mainImageLink,
-            price: unitPrice,
-            IsValid: (quantityId !== '' &&
-                description !== '' &&
-                name !== '' &&
-                thumbnailLink !== '' &&
-                mainImageLink !== '' &&
-                unitPrice !== '')
-        });
-        setIsValid(quantityId !== '' &&
-            description !== '' &&
-            name !== '' &&
+
+        setIsFormValid(
+            enName !== '' &&
+            arName !== '' &&
+            unitPrice !== null &&
+            categoryId !== null &&
+            defaultQuantityId !== null &&
+            enDescription !== '' &&
+            arDescription !== '' &&
             thumbnailLink !== '' &&
-            mainImageLink !== '' &&
-            unitPrice !== '')
+            mainImageLink !== ''
+        )
     }, [
-        quantityId,
-        description,
-        name,
-        isVisable,
+        enName,
+        arName,
+        thumbnailBase64,
+        unitPrice,
+        categoryId,
+        defaultQuantityId,
+        enDescription,
+        arDescription,
         thumbnailLink,
         mainImageLink,
-        unitPrice
     ])
 
     React.useEffect(() => {
+        console.log({ selectedProduct });
+
         switch (mode) {
             case UI_FROM_MODE.EDIT:
             case UI_FROM_MODE.VIEW:
-                setQuantityId(('quantityId' in selectedProduct && selectedProduct.quantityId) ? selectedProduct.quantityId.toString() : '0')
-                setDescription(('description' in selectedProduct && selectedProduct.description) ? selectedProduct.description : '')
-                setName(('name' in selectedProduct && selectedProduct.name) ? selectedProduct.name : '')
-                setIsVisable(('isVisable' in selectedProduct && selectedProduct.isVisable) ? selectedProduct.isVisable : true)
-                setThumbnailLink(('thumbnailLink' in selectedProduct && selectedProduct.thumbnailLink) ? selectedProduct.thumbnailLink : '')
-                setmainImageLink(('mainImageLink' in selectedProduct && selectedProduct.mainImageLink) ? selectedProduct.mainImageLink : '')
-                setUnitPrice(('unitPrice' in selectedProduct && selectedProduct.unitPrice) ? selectedProduct.unitPrice.toString() : '0.0')
+                setEnName(selectedProduct?.enName || '');
+                setArName(selectedProduct?.arName || '');
+                setThumbnailBase64(selectedProduct?.thumbnailBase64 || '');
+                setUnitPrice(selectedProduct?.unitPrice || 0);
+                setCategoryId(selectedProduct?.categoryId || null);
+                setDefaultQuantityId(selectedProduct?.defaultQuantityId || null);
+                setEnDescription(selectedProduct?.enDescription || '');
+                setArDescription(selectedProduct?.arDescription || '');
+                setIsAvailableForPurchase(selectedProduct?.isAvailableForPurchase || true);
+                setThumbnailLink(selectedProduct?.thumbnailLink || '');
+                setMainImageLink(selectedProduct?.mainImageLink || '');
+                setThumbnailFile(selectedProduct?.thumbnailBase64 || selectedProduct?.thumbnailBase64);
+                setMainImageFile(selectedProduct?.mainImageFile || '');
+
                 break;
             default:
                 break;
         }
     }, [mode])
 
-    const handleSubmitNewProduct = () => {
-        console.log("handleSubmitNewProduct");
-        dispatch({
-            type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
-            payload: true
-        })
-        setTimeout(() => {
-            dispatch({
-                type: ProductsActionTypes.ADD_PRODUCT,
-                payload: {
-                    quantityId,
-                    description,
-                    name,
-                    isVisable,
-                    thumbnailLink,
-                    mainImageLink,
-                    price: unitPrice
-                }
-            })
-        }, 1000);
-        if (isValid) {
-            // submitNewProduct({
-            //     quantityId,
-            //     description,
-            //     name,
-            //     isVisable,
-            //     thumbnailLink,
-            //     mainImageLink,
-            //     price
-            // })
-        }
+    const loadSingleOrderItemsProducts: () => void = () => {
+        getSingleOrderItemsProducts().then((res) => {
+            console.log({
+                payloadRes: res
+            });
+
+            if (res.status === 200) {
+                dispatch({
+                    type: ProductsActionTypes.FETCH_ALL_PRODUCTS,
+                    payload: res.data.singleOrderItems
+                })
+            }
+        });
     }
-    const handleSubmitEditProduct = () => {
+
+    const handleSingleItemProductSubmit = () => {
         console.log("handleSubmitEditProduct");
         dispatch({
             type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
             payload: true
         })
-        setTimeout(() => {
-            dispatch({
-                type: ProductsActionTypes.UPDATE_PRODUCT,
-                payload: {
-                    quantityId,
-                    description,
-                    name,
-                    isVisable,
-                    thumbnailLink,
-                    mainImageLink,
-                    price: unitPrice
+        setIsFormValid(false);
+
+
+        createOrUpdateSingleItemProduct(
+            mainImageFile,
+            {
+                enName,
+                arName,
+                thumbnailBase64,
+                unitPrice,
+                categoryId,
+                defaultQuantityId,
+                enDescription,
+                arDescription,
+                isAvailableForPurchase,
+                id: selectedProduct.id
+
+            },
+            mode).then((res: any) => {
+
+                if (res.status === 201) {
+                    loadSingleOrderItemsProducts();
+                    toggleOpenProductForm();
                 }
-            })
-        }, 1000);
+                else {
+                    alert('ERROR');
+                    console.log({ error: res });
+
+                }
+            }).catch(err => {
+                console.log({ AFTER__ERR__createOrUpdateSingleItemProduct: err });
+                // hadleError(err.response?.data?.errors || [{ Gereral: 'حدث خطأ' }]);
+                console.log({ errors: err.response?.data?.errors });
+            });
 
     }
+
     const getFormName = () => {
         switch (mode) {
             case UI_FROM_MODE.NEW:
                 return 'إضافة منتج جديد'
             default:
-                return 'name' in selectedProduct ? selectedProduct.name : ''
+                return 'arName' in selectedProduct ? selectedProduct.arName : ''
         }
     }
+
+    React.useEffect(() => {
+        getCategoriesList().then((res: any) => {
+            console.log({ res });
+            if (res?.status === 200) {
+                setCategoriesList(res?.data?.categories)
+            } else {
+
+            }
+        })
+
+        getQuantitiesList().then((res: any) => {
+            console.log({ res });
+            if (res?.status === 200) {
+                setQuantitiesList(res?.data)
+            } else {
+
+            }
+        })
+
+
+    }, [])
+
+
     return (
 
         <Container maxWidth="lg" className={classes.formContainer}>
@@ -249,47 +330,76 @@ const ProductForm = (props: Props) => {
 
             <form autoComplete="on" className={classes.formWrapper}>
 
-                <TextField
-                    className={classes.textField}
-                    required
-                    fullWidth
-                    id="item-name"
-                    label="الاسم"
-                    defaultValue=""
-                    variant={mode === UI_FROM_MODE.VIEW ? "standard" : "outlined"}
-                    value={name}
-                    onChange={handleNameChange}
-                    disabled={mode === UI_FROM_MODE.VIEW}
-                />
-                <TextField
-                    className={classes.textField}
-                    required
-                    multiline
-                    fullWidth
-                    rows={4}
-                    id="outlined-required"
-                    label="الوصف"
-                    defaultValue=""
-                    variant={mode === UI_FROM_MODE.VIEW ? "standard" : "outlined"}
-                    disabled={mode === UI_FROM_MODE.VIEW}
-                    value={description}
-                    onChange={handleDescriptionChange}
-                />
+                <Grid direction="row" container
+                    justify="flex-start"
+                    alignItems="flex-start">
+                    <Grid item xs={6} className={classes.paddingRight_1}>
+                        <TextField
+                            className={classes.textField}
+                            required
+                            fullWidth
+                            id="item-arName"
+                            label="الاسم العربي"
+
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
+                            value={arName}
+                            onChange={handleArNameChange}
+                            InputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
+                            }}
+                        />
+
+                        <TextField
+                            className={classes.textField}
+                            required
+                            multiline
+                            fullWidth
+                            rows={4}
+                            label="الوصف العربي"
+                            id="outlined-arDescription"
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
+                            InputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
+                            }}
+                            value={arDescription}
+                            onChange={handleArDescriptionChange}
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+
+                        <TextField
+                            className={classes.textField}
+                            required
+                            fullWidth
+                            id="item-enName"
+                            label="الاسم الانجليزي"
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
+                            value={enName}
+                            onChange={handleEnNameChange}
+                            InputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
+                            }} />
+                        <TextField
+                            className={classes.textField}
+                            required
+                            multiline
+                            fullWidth
+                            rows={4}
+                            id="outlined-enDescription"
+                            label="الوصف الانجليزي"
+
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
+                            InputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
+                            }}
+                            value={enDescription}
+                            onChange={handleEnDescriptionChange}
+                        /> </Grid> </Grid>
 
                 <Grid direction="row" container
                     justify="flex-start"
-                    alignItems="flex-start">
-                    <FormControlLabel className={classes.isVisableSwitch}
-                        control={<Switch checked={isVisable} onChange={handleIsVisableChange} name="isVisableSwitch" inputProps={{ 'aria-label': 'is product visable Switch' }}
-                            // variant={mode === UI_FROM_MODE.VIEW ? "standard" : "outlined"}
-                            disabled={mode === UI_FROM_MODE.VIEW} />}
-                        label={`إظهار المنتج للعملاء (${isVisable ? 'مرئي' : 'غير مرئي'})`}
-                    />
-                </Grid>
-                <Grid direction="row" container
-                    justify="flex-start"
-                    alignItems="flex-start">
-                    <Grid xs={6} className={classes.paddingRight_1}>
+                    alignItems="center" >
+                    <Grid item xs={6} className={classes.paddingRight_1}>
                         <TextField
                             className={classes.textField}
                             required
@@ -297,96 +407,145 @@ const ProductForm = (props: Props) => {
                             fullWidth
                             id="outlined-required"
                             label="السعر الوحدة"
-                            defaultValue=""
-                            variant={mode === UI_FROM_MODE.VIEW ? "standard" : "outlined"}
-                            disabled={mode === UI_FROM_MODE.VIEW}
+
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
                             type="number"
                             value={unitPrice}
-                            onChange={handlePriceChange}
+                            onChange={handleUnitPriceChange}
                             InputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
                                 endAdornment: <InputAdornment position="start">ريال</InputAdornment>,
                             }}
                         />
+
                     </Grid>
-                    <Grid xs={6} >
+
+                    <Grid item xs={6}>
+                        <FormControlLabel className={classes.isVisableSwitch}
+                            control={<Switch checked={isAvailableForPurchase} onChange={handleIsAvailableForPurchaseChange} name="isVisableSwitch" inputProps={{ 'aria-label': 'is product visable Switch' }}
+                                // variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
+                                disabled={mode === UI_FROM_MODE.VIEW} />}
+                            label={`إظهار المنتج للعملاء (${isAvailableForPurchase ? 'مرئي' : 'غير مرئي'})`}
+                        />
+                    </Grid>
+
+                </Grid>
+
+                <Grid direction="row" container
+                    justify="flex-start"
+                    alignItems="flex-start">
+                    <Grid item xs={6} className={classes.paddingRight_1}>
                         <FormControl
-                            variant={mode === UI_FROM_MODE.VIEW ? "standard" : "outlined"}
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
+                            disabled={mode === UI_FROM_MODE.VIEW}
+                            fullWidth>
+                            <InputLabel id="demo-simple-select-outlined-label">الفئة</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                value={categoryId}
+                                onChange={handleCategoryIdChange}
+                                label="CategoryId"
+                            >
+                                <MenuItem value="">
+                                    <em>None</em>
+                                </MenuItem>
+                                {categoriesList.map((cat: TCategory) => (
+                                    <MenuItem value={cat.id}>{cat?.arName}</MenuItem>
+
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                    </Grid>
+                    <Grid item xs={6} >
+                        <FormControl
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
                             disabled={mode === UI_FROM_MODE.VIEW}
                             fullWidth>
                             <InputLabel id="demo-simple-select-outlined-label">الكمية الافتراضية</InputLabel>
                             <Select
                                 labelId="demo-simple-select-outlined-label"
                                 id="demo-simple-select-outlined"
-                                value={quantityId}
-                                onChange={handlequantityIdChange}
-                                label="Age"
+                                value={defaultQuantityId}
+                                onChange={handleDefaultQuantityIdChange}
+                                label="categoryId"
                             >
                                 <MenuItem value="">
                                     <em>None</em>
                                 </MenuItem>
-                                <MenuItem value={10}>Ten</MenuItem>
-                                <MenuItem value={20}>Twenty</MenuItem>
-                                <MenuItem value={30}>Thirty</MenuItem>
+                                {quantitiesList.map((quantity: TQuantity) => (
+                                    <MenuItem value={quantity.id}>{quantity?.arName}</MenuItem>
+                                ))}
                             </Select>
                         </FormControl>
                     </Grid>
 
                 </Grid>
-                <Grid container>
-                    <Grid xs={6} direction="column" className={`${classes.uploadBlock} ${classes.paddingRight_1}`}>
+
+                <Grid direction="row" container>
+                    <Grid item xs={6} container direction="column" className={`${classes.uploadBlock} ${classes.paddingRight_1}`}>
                         <Grid direction="column" className={classes.uploadButtonBlock}
                             justify="flex-start"
+                            container
                             alignItems="flex-start">
-                            {/* <Paper> */}
                             <Typography variant="subtitle1" className={classes.uploadLabel}>
-                                إرفاق صورة مصغرة
+                                صورة مصغرة
                             </Typography>
-                            <Button
+                            {mode !== UI_FROM_MODE.VIEW && <Button
                                 variant="contained"
                                 color="primary"
                                 component="label"
                             >إختيار الصورة<input
                                     type="file"
                                     hidden
-                                    onChange={handleThumbnailImageChange}
+                                    onChange={handleThumbnailLinkChange}
+                                    accept="image/x-png,image/gif,image/jpeg"
                                 />
-                            </Button>
+                            </Button>}
                         </Grid>
-                        <CardMedia
+                        {thumbnailErrorText !== '' ? <Typography variant="subtitle1" color="error" className={classes.cover}>
+                            {thumbnailErrorText}
+                        </Typography> : thumbnailLink && <CardMedia
                             className={classes.cover}
+                            component="img"
                             image={thumbnailLink}
                             title="Product thumbnail image"
-                        />
+                        />}
                     </Grid>
-                    <Grid xs={6} direction="column" className={classes.uploadBlock}>
+                    <Grid item xs={6} container direction="column" className={classes.uploadBlock}>
                         <Grid direction="column" className={classes.uploadButtonBlock}
                             justify="flex-start"
+                            container
                             alignItems="flex-start">
-                            {/* <Paper> */}
                             <Typography variant="subtitle1" className={classes.uploadLabel}>
-                                إرفاق الصورة الاساسية
+                                الصورة الاساسية
                             </Typography>
-                            <Button
+                            {mode !== UI_FROM_MODE.VIEW && <Button
                                 variant="contained"
                                 color="primary"
                                 component="label"
                             >إختيار الصورة<input
                                     type="file"
                                     hidden
-                                    onChange={handleMainImageChange}
+                                    onChange={handleMainImageLinkChange}
+                                    accept="image/x-png,image/gif,image/jpeg"
                                 />
-                            </Button>
+                            </Button>}
                         </Grid>
-                        <CardMedia
+                        {mainImageErrorText !== '' ? <Typography variant="subtitle1" color="error" className={classes.cover}>
+                            {mainImageErrorText}
+                        </Typography> : mainImageLink && <CardMedia
                             className={classes.cover}
+                            component="img"
                             image={mainImageLink}
                             title="Main Product Image"
-                        />
+                        />}
                     </Grid>
                 </Grid>
             </form>
 
-            <Button color="primary" variant="contained" disabled={!isValid} onClick={() => { mode === UI_FROM_MODE.NEW ? handleSubmitNewProduct() : handleSubmitEditProduct() }}>حفظ</Button>
+            {mode !== UI_FROM_MODE.VIEW && <Button color="primary" variant="contained" disabled={!isFormValid} className={classes.saveButton} onClick={handleSingleItemProductSubmit}>حفظ</Button>}
         </Container>
     )
 }

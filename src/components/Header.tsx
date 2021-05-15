@@ -45,6 +45,7 @@ const Header = (props: Props) => {
                 <Tab label="المنتجات" id='simple-tab-0' aria-controls='simple-tabpanel-0' />
                 <Tab label="الطلبات" id='simple-tab-1' aria-controls='simple-tabpanel-1' />
                 <Tab label="المستخدمين" id='simple-tab-2' aria-controls='simple-tabpanel-2' />
+                <Tab label="الإعدادات" id='simple-tab-3' aria-controls='simple-tabpanel-3' />
             </Tabs>
         </AppBar>
     )
