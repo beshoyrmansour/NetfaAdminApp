@@ -26,11 +26,12 @@ axios.interceptors.request.use(
         // config.headers.Authorization = `bearer ${localStorage.getItem('token')}`;
         // config.headers.withCredentials = `true`;
         
-        config.headers["Access-Control-Allow-Origin"] = "*";
+        // config.headers["Access-Control-Allow-Origin"] = "*";
+        
         // config.headers['Vary'] = "Origin";
         // config.headers['Access-Control-Allow-Methods'] = "GET, POST, PUT, DELETE, HEAD, OPTIONS";
-        config.headers["Access-Control-Allow-Credentials"] = "true";
-        config.headers["Access-Control-Allow-Headers"] = "Content-Type accept";
+        // config.headers["Access-Control-Allow-Credentials"] = "true";
+        // config.headers["Access-Control-Allow-Headers"] = "Content-Type accept";
 
         return config;
     },
