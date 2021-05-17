@@ -259,11 +259,11 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
             )}
             {selectedIds.length > 0 ? (
                 <>
-                    {showVisableToggle && <Tooltip title="أخفاء">
+                    {/* {showVisableToggle && <Tooltip title="أخفاء">
                         <IconButton aria-label="hide">
                             <VisibilityOffIcon />
                         </IconButton>
-                    </Tooltip>}
+                    </Tooltip>} */}
                     <Tooltip title="Delete">
                         <IconButton aria-label="delete" onClick={handleDeleteProducts}>
                             <DeleteIcon />
