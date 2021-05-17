@@ -41,7 +41,7 @@ const ConfirmDialog = (props: Props) => {
                 <Button onClick={onCancel} color="primary">
                     تراجع
           </Button>
-                <Button onClick={onSubmit} color="primary" autoFocus>
+                <Button onClick={onSubmit} color="secondary" autoFocus>
                     {sumbit}
                 </Button>
             </DialogActions>

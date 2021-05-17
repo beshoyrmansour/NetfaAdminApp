@@ -1,4 +1,5 @@
 import { AxiosResponse } from "axios";
+import { TOGGLE_MODES } from "./configs";
 
 export type TProduct = {
     enName: string;
@@ -60,3 +61,26 @@ export type ProductsReducerType = {
     isLoadingSelectedProduct: boolean,
     isLoadingProducts: boolean,
 };
+
+export interface IToggleProductsReq {
+    (
+
+        porductIds: number[],
+        productIsAvailableForPurchase: boolean
+
+    ): Promise<AxiosResponse>
+}
+export interface IDeleteProductReq {
+    (
+
+        porductId: number,
+
+    ): Promise<AxiosResponse>
+}
+export interface IDeleteProductsBulkReq {
+    (
+
+        porductIds: string[],
+
+    ): Promise<AxiosResponse>
+}

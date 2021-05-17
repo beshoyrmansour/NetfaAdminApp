@@ -23,8 +23,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
 
 import SubdirectoryArrowLeftIcon from '@material-ui/icons/SubdirectoryArrowLeft';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
@@ -33,11 +33,12 @@ import AddIcon from '@material-ui/icons/Add';
 
 import { TProduct, ProductsActionTypes } from '../../models/Products';
 import ProductForm from '../../components/ProductForm';
-import { UI_FROM_MODE } from '../../models/configs';
+import { TOGGLE_MODES, UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { getSingleOrderItemsProducts } from '../../redux/actions/productsActions';
+import { getSingleOrderItemsProducts, toggleProducts, deleteProductsBulk, loadSingleOrderItemsProducts } from '../../redux/actions/productsActions';
 import LoadingIndicator from '../../components/LoadingIndicator';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 // interface Product {
 //     calories: number;
@@ -101,6 +102,7 @@ interface EnhancedTableProps {
     orderBy: string;
     rowCount: number;
 }
+
 
 function EnhancedTableHead(props: EnhancedTableProps) {
     const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
@@ -171,17 +173,28 @@ const useToolbarStyles = makeStyles((theme: Theme) =>
 );
 
 interface EnhancedTableToolbarProps {
-    numSelected: number;
+    selectedIds: string[];
 }
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     const classes = useToolbarStyles();
+    const dispatch = useDispatch();
 
     const isLoadingProducts = useSelector((state: AppState) => state.products.isLoadingProducts);
     const products = useSelector((state: AppState) => state.products.products);
 
-    const { numSelected } = props;
+    const { selectedIds } = props;
     const [openAddNewProduct, setOpenAddNewProduct] = useState(false);
+    const [showVisableToggle, setShowVisableToggle] = useState(false);
+    const [selectredProduct, setSelectredProduct] = useState<TProduct[]>([]);
+
+
+    const [confirmDialogMessage, setConfirmDialogMessage] = React.useState<string>('');
+    const [confirmDialogSubmit, setConfirmDialogSubmit] = React.useState<string>('');
+    const [openConfirmDialog, setOpenConfirmDialog] = React.useState<boolean>(false);
+    const [confirmDialogTitle, setConfirmDialogTitle] = React.useState<string>('');
+    const [onSubmit, setOnSubmit] = React.useState<() => void>(() => { });
+
 
     const toggleOpenAddNewProduct = () => {
         console.log(openAddNewProduct);
@@ -194,30 +207,65 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
         }
     }, [isLoadingProducts])
 
+    React.useEffect(() => {
+        const newSelectredProduct = selectedIds.map((pid: string) => products.find((p: TProduct) => p.id?.toString() === pid));
+        setSelectredProduct(newSelectredProduct);
+        const enabledProductsList = newSelectredProduct.filter((p: TProduct) => p.isAvailableForPurchase);
+        setShowVisableToggle(enabledProductsList.length === newSelectredProduct.length)
+    }, [selectedIds])
+
+    const handleDeleteProducts = () => {
+
+        console.log({ selectredProduct });
+        setConfirmDialogTitle(`هل أنت متأكد`);
+        setConfirmDialogMessage(`هل تريد حذف ${selectredProduct.length} المنتجات قائمة المنتجات علي التطبيق`);
+        setConfirmDialogSubmit('حذف');
+        setOpenConfirmDialog(true);
+        const _toggleProduct: () => void = () => {
+            console.log({ handleDeleteProducts: selectredProduct });
+            dispatch({
+                type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
+                payload: true
+            });
+            deleteProductsBulk(selectedIds).then(() => {
+                loadSingleOrderItemsProducts(dispatch);
+                setOpenConfirmDialog(false);
+                setConfirmDialogTitle('');
+                setConfirmDialogMessage('');
+                setConfirmDialogSubmit('');
+                setSelectredProduct([])
+            })
+        }
+        setOnSubmit((prev) => _toggleProduct)
+    }
+    const handleConfirmDialogCancel: () => void = () => {
+        setOpenConfirmDialog(false);
+    }
+
     return (
         <Toolbar
             className={clsx(classes.root, {
-                [classes.highlight]: numSelected > 0,
+                [classes.highlight]: selectedIds.length > 0,
             })}
         >
-            {numSelected > 0 ? (
+            {selectedIds.length > 0 ? (
                 <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-                    {numSelected} محدد
+                    {selectedIds.length} محدد
                 </Typography>
             ) : (
                 <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
                     المنتجات الفردية
                 </Typography>
             )}
-            {numSelected > 0 ? (
+            {selectedIds.length > 0 ? (
                 <>
-                    <Tooltip title="أخفاء">
+                    {showVisableToggle && <Tooltip title="أخفاء">
                         <IconButton aria-label="hide">
                             <VisibilityOffIcon />
                         </IconButton>
-                    </Tooltip>
+                    </Tooltip>}
                     <Tooltip title="Delete">
-                        <IconButton aria-label="delete">
+                        <IconButton aria-label="delete" onClick={handleDeleteProducts}>
                             <DeleteIcon />
                         </IconButton>
                     </Tooltip>
@@ -236,6 +284,14 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
                     </Button>
                 </Tooltip>
             )}
+            <ConfirmDialog
+                title={confirmDialogTitle}
+                message={confirmDialogMessage}
+                sumbit={confirmDialogSubmit}
+                onCancel={handleConfirmDialogCancel}
+                onSubmit={onSubmit}
+                open={openConfirmDialog}
+            />
             <Drawer
                 variant="temporary"
                 open={openAddNewProduct}
@@ -281,12 +337,21 @@ export default function SingleOrderItemsProducts() {
     const [order, setOrder] = React.useState<Order>('asc');
     const [orderBy, setOrderBy] = React.useState<keyof TProduct>('arName');
     const [selected, setSelected] = React.useState<string[]>([]);
+
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const [fromMode, setFromMode] = useState(UI_FROM_MODE.NEW);
     const isLoadingProducts = useSelector((state: AppState) => state.products.isLoadingProducts);
     const products = useSelector((state: AppState) => state.products.products);
+
+
+    const [confirmDialogMessage, setConfirmDialogMessage] = React.useState<string>('');
+    const [confirmDialogSubmit, setConfirmDialogSubmit] = React.useState<string>('');
+    const [openConfirmDialog, setOpenConfirmDialog] = React.useState<boolean>(false);
+    const [confirmDialogTitle, setConfirmDialogTitle] = React.useState<string>('');
+    const [onSubmit, setOnSubmit] = React.useState<() => void>(() => { });
+
 
     const [openProductDetails, setOpenProductDetails] = useState(false)
     const toggleOpenProductDetails = () => {
@@ -295,20 +360,6 @@ export default function SingleOrderItemsProducts() {
     }
 
 
-    const loadSingleOrderItemsProducts: () => void = () => {
-        getSingleOrderItemsProducts().then((res) => {
-            console.log({
-                payloadRes: res
-            });
-
-            if (res.status === 200) {
-                dispatch({
-                    type: ProductsActionTypes.FETCH_ALL_PRODUCTS,
-                    payload: res.data.singleOrderItems
-                })
-            }
-        });
-    }
 
     const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof TProduct) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -320,7 +371,6 @@ export default function SingleOrderItemsProducts() {
         if (event.target.checked) {
             const newSelected = products.map((n: TProduct) => (n.id as number).toString());
             console.log({ newSelected });
-
             setSelected(newSelected);
             return;
         }
@@ -331,6 +381,7 @@ export default function SingleOrderItemsProducts() {
         const rowId = row.id as number;
         const selectedIndex = selected.indexOf(rowId.toString());
         let newSelected: string[] = [];
+        let newSelectedProducts: TProduct[] = [];
         if (selectedIndex === -1) {
             newSelected = newSelected.concat(selected, rowId.toString());
         } else if (selectedIndex === 0) {
@@ -343,8 +394,6 @@ export default function SingleOrderItemsProducts() {
                 selected.slice(selectedIndex + 1),
             );
         }
-        console.log({ newSelected });
-
         setSelected(newSelected);
     };
 
@@ -373,6 +422,7 @@ export default function SingleOrderItemsProducts() {
     React.useEffect(() => {
         if (isLoadingProducts) {
             setOpenProductDetails(false);
+            setSelected([])
         }
     }, [isLoadingProducts])
     React.useEffect(() => {
@@ -380,12 +430,40 @@ export default function SingleOrderItemsProducts() {
             type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
             payload: true
         })
-        loadSingleOrderItemsProducts();
+        loadSingleOrderItemsProducts(dispatch);
     }, [])
+
+
+    const handleToggleProduct: (product: TProduct) => void = (product) => {
+        console.log({ product });
+        setConfirmDialogTitle(`هل أنت متأكد`);
+        setConfirmDialogMessage(`هل تريد ${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'} المنتج "${product.arName}"  ${product.isAvailableForPurchase ? 'من' : 'في'} قائمة المنتجات علي التطبيق`);
+        setConfirmDialogSubmit(`${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'}`);
+        setOpenConfirmDialog(true);
+        const _toggleProduct: () => void = () => {
+            console.log({ handleToggleProduct: product });
+            dispatch({
+                type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
+                payload: true
+            });
+            toggleProducts([product.id as number], product.isAvailableForPurchase).then(() => {
+                loadSingleOrderItemsProducts(dispatch);
+                setOpenConfirmDialog(false);
+                setConfirmDialogTitle('');
+                setConfirmDialogMessage('');
+                setConfirmDialogSubmit('');
+            })
+        }
+        setOnSubmit((prev) => _toggleProduct)
+    }
+    const handleConfirmDialogCancel: () => void = () => {
+        setOpenConfirmDialog(false);
+    }
+
     return (
         <div className={classes.root}>
             <Paper className={classes.paper}>
-                <EnhancedTableToolbar numSelected={selected.length} />
+                <EnhancedTableToolbar selectedIds={selected} />
                 {isLoadingProducts ? (<LoadingIndicator width="100%" height="400px" />)
                     : (
                         <>
@@ -439,7 +517,7 @@ export default function SingleOrderItemsProducts() {
                                                         {selected.length <= 0 &&
                                                             <Box display="flex">
                                                                 <Tooltip title="إخفاء">
-                                                                    <IconButton aria-label="إخفاء">
+                                                                    <IconButton aria-label="إخفاء" onClick={() => handleToggleProduct(row)}>
                                                                         {row.isAvailableForPurchase ? <VisibilityOffIcon color="primary" /> : <VisibilityIcon color="primary" />}
                                                                     </IconButton>
                                                                 </Tooltip>
@@ -460,7 +538,14 @@ export default function SingleOrderItemsProducts() {
                                                 </TableRow>
                                             );
                                         })}
-
+                                        <ConfirmDialog
+                                            title={confirmDialogTitle}
+                                            message={confirmDialogMessage}
+                                            sumbit={confirmDialogSubmit}
+                                            onCancel={handleConfirmDialogCancel}
+                                            onSubmit={onSubmit}
+                                            open={openConfirmDialog}
+                                        />
                                         <Drawer
                                             variant="temporary"
                                             open={openProductDetails}

@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import DeleteIcon from '@material-ui/icons/Delete';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -15,15 +16,19 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
-import { ProductsActionTypes } from '../models/Products';
-import { UI_FROM_MODE } from '../models/configs';
+import { ProductsActionTypes, TProduct } from '../models/Products';
+import { TOGGLE_MODES, UI_FROM_MODE } from '../models/configs';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../redux/store';
-import { createOrUpdateSingleItemProduct, getSingleOrderItemsProducts } from '../redux/actions/productsActions';
+import { createOrUpdateSingleItemProduct, deleteProduct, loadSingleOrderItemsProducts, toggleProducts } from '../redux/actions/productsActions';
 import { TCategory } from '../models/Categories';
 import { getCategoriesList } from '../redux/actions/categoriesActions';
 import { getQuantitiesList } from '../redux/actions/settingActions';
 import { TQuantity } from '../models/Quantity';
+import ConfirmDialog from './ConfirmDialog';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+
 
 interface Props {
     toggleOpenProductForm: () => void;
@@ -86,6 +91,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         textAlign: 'center'
     },
     paddingRight_1: { paddingRight: theme.spacing(1) },
+    marginRight_2: { marginRight: theme.spacing(2) },
     saveButton: { marginBottom: theme.spacing(1) },
 }));
 
@@ -115,6 +121,13 @@ const ProductForm = (props: Props) => {
     const [categoriesList, setCategoriesList] = React.useState([]);
     const [quantitiesList, setQuantitiesList] = React.useState([]);
 
+
+    const [confirmDialogMessage, setConfirmDialogMessage] = React.useState<string>('');
+    const [confirmDialogSubmit, setConfirmDialogSubmit] = React.useState<string>('');
+    const [openConfirmDialog, setOpenConfirmDialog] = React.useState<boolean>(false);
+    const [confirmDialogTitle, setConfirmDialogTitle] = React.useState<string>('');
+    const [onSubmit, setOnSubmit] = React.useState<() => void>(() => { });
+
     const handleEnNameChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setEnName(event.target.value as string)
     }
@@ -139,7 +152,7 @@ const ProductForm = (props: Props) => {
         setArDescription(event.target.value as string)
     }
     const handleIsAvailableForPurchaseChange = (event: React.ChangeEvent<{ checked: boolean }>) => {
-        setIsAvailableForPurchase(event.target.checked)
+        if (mode !== UI_FROM_MODE.VIEW) setIsAvailableForPurchase(event.target.checked)
     }
     const _handleReaderLoaded = (readerEvt: any) => {
         let binaryString = readerEvt.target.result;
@@ -176,6 +189,56 @@ const ProductForm = (props: Props) => {
             setMainImageLink("");
         };
     };
+
+    const handleDeleteProduct: (product: TProduct) => void = (product) => {
+        console.log({ product });
+        setConfirmDialogTitle(`هل أنت متأكد`);
+        setConfirmDialogMessage(`هل تريد حذف المنتج من قائمة المنتجات`);
+        setConfirmDialogSubmit("حذف");
+        setOpenConfirmDialog(true);
+        const _deleteProduct: () => void = () => {
+            console.log({ handleDeleteProduct: product });
+            dispatch({
+                type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
+                payload: true
+            });
+            deleteProduct(product.id as number).then(() => {
+                loadSingleOrderItemsProducts(dispatch);
+                setOpenConfirmDialog(false);
+                setConfirmDialogTitle('');
+                setConfirmDialogMessage('');
+                setConfirmDialogSubmit('');
+            })
+        }
+        setOnSubmit((prev) => _deleteProduct)
+    }
+
+    const handleToggleProduct: (product: TProduct) => void = (product) => {
+        console.log({ product });
+        setConfirmDialogTitle(`هل أنت متأكد`);
+        setConfirmDialogMessage(`هل تريد ${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'} المنتج "${product.arName}"  ${product.isAvailableForPurchase ? 'من' : 'في'} قائمة المنتجات علي التطبيق`);
+        setConfirmDialogSubmit(`${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'}`);
+        setOpenConfirmDialog(true);
+        const _toggleProduct: () => void = () => {
+            console.log({ handleToggleProduct: product });
+            dispatch({
+                type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
+                payload: true
+            });
+            toggleProducts([product.id as number], product.isAvailableForPurchase).then(() => {
+                loadSingleOrderItemsProducts(dispatch);
+                setOpenConfirmDialog(false);
+                setConfirmDialogTitle('');
+                setConfirmDialogMessage('');
+                setConfirmDialogSubmit('');
+            })
+        }
+        setOnSubmit((prev) => _toggleProduct)
+    }
+    const handleConfirmDialogCancel: () => void = () => {
+        setOpenConfirmDialog(false);
+    }
+
 
     React.useEffect(() => {
 
@@ -218,7 +281,7 @@ const ProductForm = (props: Props) => {
                 setEnDescription(selectedProduct?.enDescription || '');
                 setArDescription(selectedProduct?.arDescription || '');
                 setIsAvailableForPurchase(selectedProduct?.isAvailableForPurchase || true);
-                setThumbnailLink(selectedProduct?.thumbnailLink || '');
+                setThumbnailLink(selectedProduct?.thumbnailBase64 ? `data:image/png;base64,${selectedProduct?.thumbnailBase64}` : '');
                 setMainImageLink(selectedProduct?.mainImageLink || '');
                 setThumbnailFile(selectedProduct?.thumbnailBase64 || selectedProduct?.thumbnailBase64);
                 setMainImageFile(selectedProduct?.mainImageFile || '');
@@ -228,21 +291,6 @@ const ProductForm = (props: Props) => {
                 break;
         }
     }, [mode])
-
-    const loadSingleOrderItemsProducts: () => void = () => {
-        getSingleOrderItemsProducts().then((res) => {
-            console.log({
-                payloadRes: res
-            });
-
-            if (res.status === 200) {
-                dispatch({
-                    type: ProductsActionTypes.FETCH_ALL_PRODUCTS,
-                    payload: res.data.singleOrderItems
-                })
-            }
-        });
-    }
 
     const handleSingleItemProductSubmit = () => {
         console.log("handleSubmitEditProduct");
@@ -271,8 +319,8 @@ const ProductForm = (props: Props) => {
             mode).then((res: any) => {
 
                 if (res.status === 201) {
-                    loadSingleOrderItemsProducts();
-                    toggleOpenProductForm();
+                    loadSingleOrderItemsProducts(dispatch);
+                    // toggleOpenProductForm();
                 }
                 else {
                     alert('ERROR');
@@ -284,8 +332,9 @@ const ProductForm = (props: Props) => {
                 // hadleError(err.response?.data?.errors || [{ Gereral: 'حدث خطأ' }]);
                 console.log({ errors: err.response?.data?.errors });
             });
-
     }
+
+
 
     const getFormName = () => {
         switch (mode) {
@@ -325,7 +374,25 @@ const ProductForm = (props: Props) => {
             <div className={classes.title}>
 
                 <Typography variant="h4">{getFormName()}</Typography>
-                <IconButton onClick={toggleOpenProductForm}><CloseIcon /></IconButton>
+                <div>
+                    {mode === UI_FROM_MODE.EDIT && <>
+                        <Button
+                            onClick={() => handleToggleProduct(selectedProduct)}
+                            variant="outlined"
+                            color="primary"
+                            className={classes.marginRight_2}
+                            endIcon={selectedProduct.isAvailableForPurchase ? <VisibilityOffIcon color="primary" /> : <VisibilityIcon color="primary" />}
+                        > {` ${selectedProduct.isAvailableForPurchase ? 'اخفاء' : 'إظهار'} المنتج `}</Button>
+                        <Button
+                            onClick={() => handleDeleteProduct(selectedProduct)}
+                            variant="outlined"
+                            color="primary"
+                            className={classes.marginRight_2}
+                            endIcon={<DeleteIcon />}
+                        > حذف المنتج </Button>
+                    </>}
+                    <IconButton onClick={toggleOpenProductForm}><CloseIcon /></IconButton>
+                </div>
             </div>
 
             <form autoComplete="on" className={classes.formWrapper}>
@@ -422,9 +489,13 @@ const ProductForm = (props: Props) => {
 
                     <Grid item xs={6}>
                         <FormControlLabel className={classes.isVisableSwitch}
-                            control={<Switch checked={isAvailableForPurchase} onChange={handleIsAvailableForPurchaseChange} name="isVisableSwitch" inputProps={{ 'aria-label': 'is product visable Switch' }}
-                                // variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
-                                disabled={mode === UI_FROM_MODE.VIEW} />}
+                            control={<Switch checked={isAvailableForPurchase} onChange={handleIsAvailableForPurchaseChange} name="isVisableSwitch" inputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
+                                'aria-label': 'is product visable Switch'
+                            }}
+                            // variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
+                            // disabled={mode === UI_FROM_MODE.VIEW}
+                            />}
                             label={`إظهار المنتج للعملاء (${isAvailableForPurchase ? 'مرئي' : 'غير مرئي'})`}
                         />
                     </Grid>
@@ -541,10 +612,18 @@ const ProductForm = (props: Props) => {
                             image={mainImageLink}
                             title="Main Product Image"
                         />}
+
                     </Grid>
                 </Grid>
             </form>
-
+            <ConfirmDialog
+                title={confirmDialogTitle}
+                message={confirmDialogMessage}
+                sumbit={confirmDialogSubmit}
+                onCancel={handleConfirmDialogCancel}
+                onSubmit={onSubmit}
+                open={openConfirmDialog}
+            />
             {mode !== UI_FROM_MODE.VIEW && <Button color="primary" variant="contained" disabled={!isFormValid} className={classes.saveButton} onClick={handleSingleItemProductSubmit}>حفظ</Button>}
         </Container>
     )
