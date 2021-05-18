@@ -20,7 +20,6 @@ export type TProduct = {
     quantityArName?: string;
 }
 
-// Type of Actions allowed
 export enum ProductsActionTypes {
     FETCH_ALL_PRODUCTS = "PRODUCT__FETCH_ALL_PRODUCTS",
     FETCH_PRODUCT = "PRODUCT__FETCH_PRODUCT",
@@ -36,7 +35,6 @@ export type ProductsActionType = {
     payload?: any;
 };
 
-// Action Generator for ADD
 export interface IGetSingleOrderItemsProductsReq {
     (
         AvailableForPurchaseOnly?: boolean,
@@ -46,14 +44,12 @@ export interface IGetSingleOrderItemsProductsReq {
     ): Promise<AxiosResponse>
 }
 
-// Action Generator for Remove
 export const removeProductType = (product: TProduct) => {
     return {
         type: ProductsActionTypes.REMOVE_PRODUCT,
         payload: product
     };
 };
-
 
 export type ProductsReducerType = {
     products: TProduct[],
@@ -64,23 +60,15 @@ export type ProductsReducerType = {
 
 export interface IToggleProductsReq {
     (
-
         porductIds: number[],
         productIsAvailableForPurchase: boolean
-
     ): Promise<AxiosResponse>
 }
+
 export interface IDeleteProductReq {
-    (
-
-        porductId: number,
-
-    ): Promise<AxiosResponse>
+    (porductId: number): Promise<AxiosResponse>
 }
+
 export interface IDeleteProductsBulkReq {
-    (
-
-        porductIds: string[],
-
-    ): Promise<AxiosResponse>
+    (porductIds: string[]): Promise<AxiosResponse>
 }

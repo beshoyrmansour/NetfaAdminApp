@@ -18,6 +18,17 @@ export type TBundle = {
     content: TProduct[];
 }
 
+
+export enum BundlesActionTypes {
+    FETCH_ALL_PRODUCTS = "BUNDLES__FETCH_ALL_PRODUCTS",
+    FETCH_PRODUCT = "BUNDLES__FETCH_PRODUCT",
+    ADD_PRODUCT = "BUNDLES__ADD_PRODUCT",
+    SET_SELECTED_PRODUCT = "BUNDLES__SET_SELECTED_PRODUCT",
+    REMOVE_PRODUCT = "BUNDLES__REMOVE_PRODUCT",
+    UPDATE_PRODUCT = "BUNDLES__UPDATE_PRODUCT",
+    SET_IS_LOADING_PRODUCTS = "BUNDLES__SET_IS_LOADING_PRODUCTS",
+    
+}
 export interface IGetBundlesListReq {
     (
         AvailableForPurchaseOnly: boolean,

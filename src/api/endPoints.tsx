@@ -7,6 +7,8 @@ export default {
   SINGLE_ORDER_ITEMS: `${API_URL}/singleOrderItems`,
   QUANTITIES: `${API_URL}/quantities`,
   IMAGES: `${API_URL}/images`,
-  BUNDLE: `${API_URL}/bundle`,
+  BUNDLES: `${API_URL}/bundles`,
   CATEGORIES: `${API_URL}/categories`,
+  BRANCHES: `${API_URL}/branches`,
+  ADDRESSES: `${API_URL}/addresses`,
 };

@@ -23,19 +23,23 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
 
 import SubdirectoryArrowLeftIcon from '@material-ui/icons/SubdirectoryArrowLeft';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 // import FilterListIcon from '@material-ui/icons/FilterList';
 
-import { TProduct, ProductsActionTypes } from '../../models/Products';
-import ProductForm from '../../components/ProductForm';
-import { UI_FROM_MODE } from '../../models/configs';
+import { TProduct } from '../../models/Products';
+import { BundlesActionTypes } from '../../models/Bundles';
+import BundleForm from '../../components/BundleForm';
+import { TOGGLE_MODES, UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
+import { getSingleOrderItemsProducts, toggleProducts, deleteProductsBulk, loadSingleOrderItemsProducts } from '../../redux/actions/bundlesActions';
+import LoadingIndicator from '../../components/LoadingIndicator';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 // interface Product {
 //     calories: number;
@@ -99,6 +103,7 @@ interface EnhancedTableProps {
     orderBy: string;
     rowCount: number;
 }
+
 
 function EnhancedTableHead(props: EnhancedTableProps) {
     const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
@@ -169,17 +174,28 @@ const useToolbarStyles = makeStyles((theme: Theme) =>
 );
 
 interface EnhancedTableToolbarProps {
-    numSelected: number;
+    selectedIds: string[];
 }
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     const classes = useToolbarStyles();
+    const dispatch = useDispatch();
 
-    const isLoadingProducts = useSelector((state: AppState) => state.products.isLoadingProducts);
-    const products = useSelector((state: AppState) => state.products.products);
+    const isLoadingProducts = useSelector((state: AppState) => state.bundles.isLoadingProducts);
+    const products = useSelector((state: AppState) => state.bundles.products);
 
-    const { numSelected } = props;
+    const { selectedIds } = props;
     const [openAddNewProduct, setOpenAddNewProduct] = useState(false);
+    const [showVisableToggle, setShowVisableToggle] = useState(false);
+    const [selectredProduct, setSelectredProduct] = useState<TProduct[]>([]);
+
+
+    const [confirmDialogMessage, setConfirmDialogMessage] = React.useState<string>('');
+    const [confirmDialogSubmit, setConfirmDialogSubmit] = React.useState<string>('');
+    const [openConfirmDialog, setOpenConfirmDialog] = React.useState<boolean>(false);
+    const [confirmDialogTitle, setConfirmDialogTitle] = React.useState<string>('');
+    const [onSubmit, setOnSubmit] = React.useState<() => void>(() => { });
+
 
     const toggleOpenAddNewProduct = () => {
         console.log(openAddNewProduct);
@@ -192,30 +208,65 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
         }
     }, [isLoadingProducts])
 
+    React.useEffect(() => {
+        const newSelectredProduct = selectedIds.map((pid: string) => products.find((p: TProduct) => p.id?.toString() === pid));
+        setSelectredProduct(newSelectredProduct);
+        const enabledProductsList = newSelectredProduct.filter((p: TProduct) => p.isAvailableForPurchase);
+        setShowVisableToggle(enabledProductsList.length === newSelectredProduct.length)
+    }, [selectedIds])
+
+    const handleDeleteProducts = () => {
+
+        console.log({ selectredProduct });
+        setConfirmDialogTitle(`هل أنت متأكد`);
+        setConfirmDialogMessage(`هل تريد حذف ${selectredProduct.length} المنتجات قائمة المنتجات علي التطبيق`);
+        setConfirmDialogSubmit('حذف');
+        setOpenConfirmDialog(true);
+        const _toggleProduct: () => void = () => {
+            console.log({ handleDeleteProducts: selectredProduct });
+            dispatch({
+                type: BundlesActionTypes.SET_IS_LOADING_PRODUCTS,
+                payload: true
+            });
+            deleteProductsBulk(selectedIds).then(() => {
+                loadSingleOrderItemsProducts(dispatch);
+                setOpenConfirmDialog(false);
+                setConfirmDialogTitle('');
+                setConfirmDialogMessage('');
+                setConfirmDialogSubmit('');
+                setSelectredProduct([])
+            })
+        }
+        setOnSubmit((prev) => _toggleProduct)
+    }
+    const handleConfirmDialogCancel: () => void = () => {
+        setOpenConfirmDialog(false);
+    }
+
     return (
         <Toolbar
             className={clsx(classes.root, {
-                [classes.highlight]: numSelected > 0,
+                [classes.highlight]: selectedIds.length > 0,
             })}
         >
-            {numSelected > 0 ? (
+            {selectedIds.length > 0 ? (
                 <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-                    {numSelected} محدد
+                    {selectedIds.length} محدد
                 </Typography>
             ) : (
                 <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-                    مجموعات المنتجات
+                    المنتجات الفردية
                 </Typography>
             )}
-            {numSelected > 0 ? (
+            {selectedIds.length > 0 ? (
                 <>
-                    <Tooltip title="أخفاء">
+                    {/* {showVisableToggle && <Tooltip title="أخفاء">
                         <IconButton aria-label="hide">
                             <VisibilityOffIcon />
                         </IconButton>
-                    </Tooltip>
+                    </Tooltip>} */}
                     <Tooltip title="Delete">
-                        <IconButton aria-label="delete">
+                        <IconButton aria-label="delete" onClick={handleDeleteProducts}>
                             <DeleteIcon />
                         </IconButton>
                     </Tooltip>
@@ -234,12 +285,20 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
                     </Button>
                 </Tooltip>
             )}
+            <ConfirmDialog
+                title={confirmDialogTitle}
+                message={confirmDialogMessage}
+                sumbit={confirmDialogSubmit}
+                onCancel={handleConfirmDialogCancel}
+                onSubmit={onSubmit}
+                open={openConfirmDialog}
+            />
             <Drawer
                 variant="temporary"
                 open={openAddNewProduct}
                 anchor="right"
             >
-                <ProductForm toggleOpenProductForm={toggleOpenAddNewProduct} mode={UI_FROM_MODE.NEW} />
+                <BundleForm toggleOpenBundleForm={toggleOpenAddNewProduct} mode={UI_FROM_MODE.NEW} />
 
             </Drawer>
         </Toolbar>
@@ -279,12 +338,20 @@ export default function BundlesProducts() {
     const [order, setOrder] = React.useState<Order>('asc');
     const [orderBy, setOrderBy] = React.useState<keyof TProduct>('arName');
     const [selected, setSelected] = React.useState<string[]>([]);
+
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const [fromMode, setFromMode] = useState(UI_FROM_MODE.NEW);
-    const isLoadingProducts = useSelector((state: AppState) => state.products.isLoadingProducts);
-    const products = useSelector((state: AppState) => state.products.products);
+
+    const isLoadingProducts = useSelector((state: AppState) => state.bundles.isLoadingProducts);
+    const products = useSelector((state: AppState) => state.bundles.products);
+
+    const [confirmDialogMessage, setConfirmDialogMessage] = React.useState<string>('');
+    const [confirmDialogSubmit, setConfirmDialogSubmit] = React.useState<string>('');
+    const [openConfirmDialog, setOpenConfirmDialog] = React.useState<boolean>(false);
+    const [confirmDialogTitle, setConfirmDialogTitle] = React.useState<string>('');
+    const [onSubmit, setOnSubmit] = React.useState<() => void>(() => { });
 
     const [openProductDetails, setOpenProductDetails] = useState(false)
     const toggleOpenProductDetails = () => {
@@ -300,7 +367,7 @@ export default function BundlesProducts() {
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            const newSelected = products.map((n: TProduct) => n.arName);
+            const newSelected = products.map((n: TProduct) => (n.id as number).toString());
             setSelected(newSelected);
             return;
         }
@@ -308,10 +375,11 @@ export default function BundlesProducts() {
     };
 
     const handleClick = (event: React.MouseEvent<unknown>, row: TProduct) => {
-        const selectedIndex = selected.indexOf(row.arName);
+        const rowId = row.id as number;
+        const selectedIndex = selected.indexOf(rowId.toString());
         let newSelected: string[] = [];
         if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, row.arName);
+            newSelected = newSelected.concat(selected, rowId.toString());
         } else if (selectedIndex === 0) {
             newSelected = newSelected.concat(selected.slice(1));
         } else if (selectedIndex === selected.length - 1) {
@@ -322,7 +390,6 @@ export default function BundlesProducts() {
                 selected.slice(selectedIndex + 1),
             );
         }
-
         setSelected(newSelected);
     };
 
@@ -334,30 +401,66 @@ export default function BundlesProducts() {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-    const handleOpenProductFormOnClick = (product: TProduct, mode: UI_FROM_MODE) => {
+    const handleOpenBundleFormOnClick = (product: TProduct, mode: UI_FROM_MODE) => {
         console.log({ handleViewProductDetailsOnClick: product });
         dispatch({
-            type: ProductsActionTypes.SET_SELECTED_PRODUCT,
+            type: BundlesActionTypes.SET_SELECTED_PRODUCT,
             payload: product
         })
         setFromMode(mode)
         toggleOpenProductDetails()
     };
 
+    const isSelected = (row: TProduct) => selected.indexOf((row.id as number).toString()) !== -1;
 
-    const isSelected = (row: TProduct) => selected.indexOf(row.arName) !== -1;
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, products.length - page * rowsPerPage);
     React.useEffect(() => {
         if (isLoadingProducts) {
-            setOpenProductDetails(false)
+            setOpenProductDetails(false);
+            setSelected([])
         }
     }, [isLoadingProducts])
+    React.useEffect(() => {
+        dispatch({
+            type: BundlesActionTypes.SET_IS_LOADING_PRODUCTS,
+            payload: true
+        })
+        loadSingleOrderItemsProducts(dispatch);
+    }, [])
+
+
+    const handleToggleProduct: (product: TProduct) => void = (product) => {
+        console.log({ product });
+        setConfirmDialogTitle(`هل أنت متأكد`);
+        setConfirmDialogMessage(`هل تريد ${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'} المنتج "${product.arName}"  ${product.isAvailableForPurchase ? 'من' : 'في'} قائمة المنتجات علي التطبيق`);
+        setConfirmDialogSubmit(`${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'}`);
+        setOpenConfirmDialog(true);
+        const _toggleProduct: () => void = () => {
+            console.log({ handleToggleProduct: product });
+            dispatch({
+                type: BundlesActionTypes.SET_IS_LOADING_PRODUCTS,
+                payload: true
+            });
+            toggleProducts([product.id as number], product.isAvailableForPurchase).then(() => {
+                loadSingleOrderItemsProducts(dispatch);
+                setOpenConfirmDialog(false);
+                setConfirmDialogTitle('');
+                setConfirmDialogMessage('');
+                setConfirmDialogSubmit('');
+            })
+        }
+        setOnSubmit((prev) => _toggleProduct)
+    }
+    const handleConfirmDialogCancel: () => void = () => {
+        setOpenConfirmDialog(false);
+    }
+
     return (
         <div className={classes.root}>
             <Paper className={classes.paper}>
-                <EnhancedTableToolbar numSelected={selected.length} />
-                {isLoadingProducts ? (<>LOADING....</>)
+                <EnhancedTableToolbar selectedIds={selected} />
+                {isLoadingProducts ? (<LoadingIndicator width="100%" height="400px" />)
                     : (
                         <>
                             <TableContainer>
@@ -410,16 +513,16 @@ export default function BundlesProducts() {
                                                         {selected.length <= 0 &&
                                                             <Box display="flex">
                                                                 <Tooltip title="إخفاء">
-                                                                    <IconButton aria-label="إخفاء">
+                                                                    <IconButton aria-label="إخفاء" onClick={() => handleToggleProduct(row)}>
                                                                         {row.isAvailableForPurchase ? <VisibilityOffIcon color="primary" /> : <VisibilityIcon color="primary" />}
                                                                     </IconButton>
                                                                 </Tooltip>
                                                                 <Tooltip title="تعديل">
-                                                                    <IconButton aria-label="تعديل" onClick={() => handleOpenProductFormOnClick(row, UI_FROM_MODE.EDIT)} >
+                                                                    <IconButton aria-label="تعديل" onClick={() => handleOpenBundleFormOnClick(row, UI_FROM_MODE.EDIT)} >
                                                                         <EditIcon color="primary" />
                                                                     </IconButton>
                                                                 </Tooltip>
-                                                                <Tooltip title="عرض التفاصيل" onClick={() => handleOpenProductFormOnClick(row, UI_FROM_MODE.VIEW)} >
+                                                                <Tooltip title="عرض التفاصيل" onClick={() => handleOpenBundleFormOnClick(row, UI_FROM_MODE.VIEW)} >
                                                                     <IconButton aria-label="عرض التفاصيل">
                                                                         <ChevronLeftIcon color="secondary" />
                                                                     </IconButton>
@@ -431,13 +534,20 @@ export default function BundlesProducts() {
                                                 </TableRow>
                                             );
                                         })}
-
+                                        <ConfirmDialog
+                                            title={confirmDialogTitle}
+                                            message={confirmDialogMessage}
+                                            sumbit={confirmDialogSubmit}
+                                            onCancel={handleConfirmDialogCancel}
+                                            onSubmit={onSubmit}
+                                            open={openConfirmDialog}
+                                        />
                                         <Drawer
                                             variant="temporary"
                                             open={openProductDetails}
                                             anchor="right"
                                         >
-                                            <ProductForm toggleOpenProductForm={toggleOpenProductDetails} mode={fromMode} />
+                                            <BundleForm toggleOpenBundleForm={toggleOpenProductDetails} mode={fromMode} />
 
                                         </Drawer>
                                         {emptyRows > 0 && (

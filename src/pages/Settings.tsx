@@ -15,6 +15,8 @@ import CategoriesList from '../components/settings/CategoriesList';
 import CategoryDetailsForm from '../components/settings/CategoryDetailsForm';
 import QuantityDetailsForm from '../components/settings/QuantityDetailsForm';
 import { UI_FROM_MODE } from '../models/configs';
+import BranchesList from '../components/settings/BranchesList';
+import BranchesDetailsForm from '../components/settings/BranchesDetailsForm';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -39,7 +41,11 @@ const Settings = (props: Props) => {
     const classes = useStyles();
     const [openAddQuantity, setOpenAddQuantity] = React.useState(false)
     const [openAddCategory, setOpenAddCategory] = React.useState(false)
+    const [openAddBranch, setOpenAddBranch] = React.useState(false)
 
+    const toggleOpenAddBranch = () => {
+        setOpenAddBranch(prev => !prev)
+    }
 
     const toggleOpenAddQuantity = () => {
         setOpenAddQuantity(prev => !prev)
@@ -63,9 +69,7 @@ const Settings = (props: Props) => {
                                 endIcon={<AddIcon />}
                                 onClick={toggleOpenAddQuantity}
                             >
-                                <Typography noWrap>
-                                    إضافة جديد
-                    </Typography>
+                                <Typography noWrap> إضافة جديد </Typography>
                             </Button>
                         </Tooltip>
                     </Box>
@@ -91,9 +95,7 @@ const Settings = (props: Props) => {
                                 endIcon={<AddIcon />}
                                 onClick={toggleOpenAddCategory}
                             >
-                                <Typography noWrap>
-                                    إضافة جديد
-                    </Typography>
+                                <Typography noWrap> إضافة جديد </Typography>
                             </Button>
                         </Tooltip>
                     </Box>
@@ -101,6 +103,32 @@ const Settings = (props: Props) => {
                     <QuantityDetailsForm
                         open={openAddQuantity}
                         handleClose={() => setOpenAddQuantity(false)}
+                    />
+                </Paper>
+            </Grid>
+            <Grid item xs={12} lg={12}>
+                <Paper className={classes.paper}>
+                    <Box display="flex" alignItems="center" justifyContent="space-between" width={"100%"}>
+                        <Typography variant="h4">
+                            الفروع
+                    </Typography>
+                        <Tooltip title="إضافة فئة منتجات جديدة">
+
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                endIcon={<AddIcon />}
+                                onClick={toggleOpenAddBranch}
+                            >
+                                <Typography noWrap> إضافة جديد </Typography>
+                            </Button>
+                        </Tooltip>
+                    </Box>
+                    <BranchesList />
+                    <BranchesDetailsForm
+                        open={openAddBranch}
+                        handleClose={() => setOpenAddBranch(false)}
+                        mode={UI_FROM_MODE.NEW}
                     />
                 </Paper>
             </Grid>
