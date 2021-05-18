@@ -1,3 +1,4 @@
+import { TBranch } from "./Branches";
 import { TCategory } from "./Categories";
 import { UI_FROM_MODE } from "./configs";
 import { TQuantity } from "./Quantity";
@@ -33,4 +34,10 @@ export type TSettingReducer = {
     isLoadingSelectedCategory: boolean;
     isLoadingCategories: boolean;
     categoryActiveMode: UI_FROM_MODE;
+
+    branches: TBranch[];
+    selectedBranch: TBranch | {};
+    isLoadingSelectedBranch: boolean;
+    isLoadingBranches: boolean;
+    branchActiveMode: UI_FROM_MODE;
 };

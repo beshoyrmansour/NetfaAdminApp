@@ -19,6 +19,9 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import TablePagination from '@material-ui/core/TablePagination';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Avatar from '@material-ui/core/Avatar';
+import ImageIcon from '@material-ui/icons/Image';
+import CardMedia from '@material-ui/core/CardMedia';
 
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
 
@@ -511,6 +514,14 @@ export default function SingleOrderItemsProducts() {
                                                         {row.arName}
                                                     </TableCell>
 
+                                                    <TableCell align="left"><Avatar variant="square">
+                                                        {row.thumbnailBase64 ? <CardMedia
+                                                            // className={classes.cover}
+                                                            component="img"
+                                                            image={`data:image/png;base64,${row.thumbnailBase64}`}
+                                                            title="Main Product Image"
+                                                        /> : <ImageIcon />}
+                                                    </Avatar></TableCell>
                                                     <TableCell align="left">{row.unitPrice}</TableCell>
                                                     <TableCell align="left">{row.quantityValue}</TableCell>
                                                     <TableCell align="center">

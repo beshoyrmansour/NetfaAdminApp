@@ -49,8 +49,8 @@ const Products = (props: Props) => {
                 return <SingleOrderItemsProducts />;
             case 'BundlesProducts':
                 return <BundlesProducts />;
-            case 'Categories':
-                return <Categories />;
+            // case 'Categories':
+            //     return <Categories />;
 
             default: return <SingleOrderItemsProducts />;
 
@@ -72,10 +72,10 @@ const Products = (props: Props) => {
                         </ToggleButton>
                     <ToggleButton value="BundlesProducts" aria-label="BundlesProducts" className={classes.toggleButton}>
                         مجموعات المنتجات
-                        </ToggleButton>
-                    <ToggleButton value="Categories" aria-label="BundlesProducts" className={classes.toggleButton}>
+                       </ToggleButton>
+                    {/* <ToggleButton value="Categories" aria-label="BundlesProducts" className={classes.toggleButton}>
                         الفئات المنتجات
-                        </ToggleButton>
+                        </ToggleButton> */}
 
                 </ToggleButtonGroup>
             </Grid>

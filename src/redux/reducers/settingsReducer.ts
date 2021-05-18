@@ -12,7 +12,13 @@ export const settingInitReducerState: TSettingReducer = {
     selectedCategory: {},
     isLoadingSelectedCategory: true,
     isLoadingCategories: true,
-    categoryActiveMode: UI_FROM_MODE.VIEW
+    categoryActiveMode: UI_FROM_MODE.VIEW,
+
+    branches: [],
+    selectedBranch: {},
+    isLoadingSelectedBranch: true,
+    isLoadingBranches: true,
+    branchActiveMode: UI_FROM_MODE.VIEW
 }
 
 export const settingsReducer = (state: TSettingReducer = settingInitReducerState, action: TSettingAction) => {

@@ -146,7 +146,7 @@ const CategoryDetailsForm = (props: Props) => {
                             multiline
                             fullWidth
                             id="outlined-required"
-                            label="اسم الوحدة بالعرية"
+                            label="اسم الفئة بالعرية"
                             variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
                             InputProps={{
                                 readOnly: mode === UI_FROM_MODE.VIEW,
@@ -164,7 +164,7 @@ const CategoryDetailsForm = (props: Props) => {
                             multiline
                             fullWidth
                             id="outlined-required"
-                            label="اسم الوحدة بالإنجليزية"
+                            label="اسم الفئة بالإنجليزية"
                             variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
                             InputProps={{
                                 readOnly: mode === UI_FROM_MODE.VIEW,
@@ -185,7 +185,7 @@ const CategoryDetailsForm = (props: Props) => {
                                         {product.thumbnailBase64 ? <CardMedia
                                             // className={classes.cover}
                                             component="img"
-                                            image={product.thumbnailBase64}
+                                            image={`data:image/png;base64,${product.thumbnailBase64}`}
                                             title="Main Product Image"
                                         /> : <ImageIcon />}
                                     </Avatar>

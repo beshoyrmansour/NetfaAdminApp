@@ -17,7 +17,7 @@ export type TAddress = {
     nearestLandMark?: string;
 }
 
-export type TBranches = {
+export type TBranch = {
     id?: number;
     addedDate?: string;
     modifiedDate?: string;
@@ -28,12 +28,7 @@ export type TBranches = {
 
 
 export interface IGetBranchesListReq {
-    (
-        AvailableForPurchaseOnly: boolean,
-        PageNumber: number,
-        PageSize: number,
-        OrderBy: string,
-    ): Promise<AxiosResponse>
+    (): Promise<AxiosResponse>
 }
 
 export enum BranchesActionTypes {
@@ -60,3 +55,12 @@ export interface IDeleteBranchReq {
 export interface IDeleteBranchesBulkReq {
     (branchIds: string[]): Promise<AxiosResponse>
 }
+
+export interface IAddNewBranchReq {
+    (enName: string, arName: string, address: TAddress): Promise<AxiosResponse>
+}
+
+export interface IEditBranchReq {
+    (enName: string, arName: string, address: TAddress, categoryId: number): Promise<AxiosResponse>
+}
+
