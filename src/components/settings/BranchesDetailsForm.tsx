@@ -26,6 +26,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import { BranchesActionTypes, TAddress, TBranch } from '../../models/Branches';
 import { addNewBranch, editBranch, getBranchesList } from '../../redux/actions/branchActions';
 import { AxiosResponse } from 'axios';
+import AddressForm from './AddressForm';
 
 const useStyles = makeStyles((theme: Theme) => ({
     title: {
@@ -37,6 +38,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 
     textField: {
         marginBottom: '1.2rem'
+    },
+    addressTitle: {
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(1)
     },
     paddingRight_1: { paddingRight: theme.spacing(1) },
     saveButton: { marginBottom: theme.spacing(1) },
@@ -60,8 +65,21 @@ const BranchesDetailsForm = (props: Props) => {
 
     const [enName, setEnName] = React.useState<string>(selectedBranch.enBranchName || '');
     const [arName, setArName] = React.useState<string>(selectedBranch.arBranchName || '');
-    const [address, setAddress] = React.useState<TAddress>(selectedBranch.address || {});
-    const [isFormValid, setIsFormValid] = React.useState<boolean>(false);
+    const [address, setAddress] = React.useState<TAddress>(selectedBranch.address || {
+        addressTitle: '',
+        buildingNumber: '',
+        streetName: '',
+        neighbourhood: '',
+        state: '',
+        unitNumber: '',
+        floorNumber: '',
+        latitude: 0,
+        longitude: 0,
+        recipientPhoneNumber: '',
+        nearestLandMark: '',
+    });
+    // const [isFormValid, setIsFormValid] = React.useState<boolean>(false);
+    const [isFormValid, setIsFormValid] = React.useState<boolean>(true);
 
     const loadBranchesList: () => void = () => {
         getBranchesList().then((res: AxiosResponse) => {
@@ -96,6 +114,14 @@ const BranchesDetailsForm = (props: Props) => {
     }, [selectedBranch])
 
     const handleSubmit = () => {
+        console.log({
+            enName,
+            arName,
+            address,
+        });
+
+    }
+    const __handleSubmit = () => {
         setIsFormValid(false);
         dispatch({
             type: BranchesActionTypes.SET_IS_LOADING_BRANCHES,
@@ -173,22 +199,23 @@ const BranchesDetailsForm = (props: Props) => {
                         />
                     </Grid>
                 </Grid>
+                <Typography variant="h5" className={classes.addressTitle}>عنوان الفرع</Typography>
+                <AddressForm address={address} setAddress={setAddress} mode={mode} mdSize={6} />
                 {/* {mode === UI_FROM_MODE.VIEW && selectedBranch?.products?.length > 0 &&
                     < List >
-                        <Typography variant="h5">قائمة المنتجات</Typography>
-                        {selectedBranch?.products?.map((product: TProduct) => (
-                            <ListItem>
-                                <ListItemAvatar>
-                                    <Avatar variant="square">
-                                        {product.thumbnailBase64 ? <CardMedia
-                                            // className={classes.cover}
-                                            component="img"
-                                            image={product.thumbnailBase64}
-                                            title="Main Product Image"
-                                        /> : <ImageIcon />}
-                                    </Avatar>
-                                </ListItemAvatar>
-                                <ListItemText primary="Photos" secondary="Jan 9, 2014" />
+                    {selectedBranch?.products?.map((product: TProduct) => (
+                        <ListItem>
+                        <ListItemAvatar>
+                        <Avatar variant="square">
+                        {product.thumbnailBase64 ? <CardMedia
+                            // className={classes.cover}
+                            component="img"
+                            image={product.thumbnailBase64}
+                            title="Main Product Image"
+                            /> : <ImageIcon />}
+                            </Avatar>
+                            </ListItemAvatar>
+                            <ListItemText primary="Photos" secondary="Jan 9, 2014" />
                             </ListItem>
                         ))
 

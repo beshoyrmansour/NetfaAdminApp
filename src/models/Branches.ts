@@ -5,12 +5,12 @@ export type TAddress = {
     addedDate: string;
     modifiedDate?: string;
     addressTitle?: string;
-    buildingNumber: number;
+    buildingNumber: string;
     streetName?: string;
     neighbourhood?: string;
     state?: string;
-    unitNumber: number;
-    floorNumber: number;
+    unitNumber: string;
+    floorNumber: string;
     latitude: number;
     longitude: number;
     recipientPhoneNumber?: string;
