@@ -93,6 +93,7 @@ interface HeadCell {
 
 const headCells: HeadCell[] = [
     { id: 'arName', numeric: false, disablePadding: true, label: 'الإسم' },
+    { id: 'thumbnailBase64', numeric: false, disablePadding: false, label: 'صورة المنتج' },
     { id: 'unitPrice', numeric: true, disablePadding: false, label: 'سعر الوحدة' },
     { id: 'quantityValue', numeric: true, disablePadding: false, label: 'الكمية الافتراضية' },
 ];
@@ -331,6 +332,10 @@ const useStyles = makeStyles((theme: Theme) =>
             top: 20,
             width: 1,
         },
+        noItemsText: {
+            width: "100%",
+            height: "400px",
+        }
     }),
 );
 
@@ -466,108 +471,120 @@ export default function BundlesProducts() {
                 {isLoadingProducts ? (<LoadingIndicator width="100%" height="400px" />)
                     : (
                         <>
-                            <TableContainer>
-                                <Table
-                                    className={classes.table}
-                                    aria-labelledby="tableTitle"
-                                    size={dense ? 'small' : 'medium'}
-                                    aria-label="enhanced table"
-                                >
-                                    <EnhancedTableHead
-                                        classes={classes}
-                                        numSelected={selected.length}
-                                        order={order}
-                                        orderBy={orderBy}
-                                        onSelectAllClick={handleSelectAllClick}
-                                        onRequestSort={handleRequestSort}
-                                        rowCount={products.length}
-                                    />
-                                    <TableBody>
-                                        {/* {stableSort(products, getComparator(order, orderBy))
-                                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
-                                        {products.map((row: TProduct, index: number) => {
-                                            const isItemSelected = isSelected(row);
-                                            const labelId = `enhanced-table-checkbox-${index}`;
-
-                                            return (
-                                                <TableRow
-                                                    hover
-                                                    role="checkbox"
-                                                    aria-checked={isItemSelected}
-                                                    tabIndex={-1}
-                                                    key={row.id}
-                                                    selected={isItemSelected}
-
-                                                >
-                                                    <TableCell padding="checkbox">
-                                                        <Checkbox
-                                                            onClick={(event) => handleClick(event, row)}
-                                                            checked={isItemSelected}
-                                                            inputProps={{ 'aria-labelledby': labelId }}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell component="th" id={labelId} scope="row" padding="none">
-                                                        {row.arName}
-                                                    </TableCell>
-                                                    <TableCell align="left"><Avatar variant="square">
-                                                        {row.thumbnailBase64 ? <CardMedia
-                                                            // className={classes.cover}
-                                                            component="img"
-                                                            image={`data:image/png;base64,${row.thumbnailBase64}`}
-                                                            title="Main Product Image"
-                                                        /> : <ImageIcon />}
-                                                    </Avatar></TableCell>
-                                                    <TableCell align="left">{row.unitPrice}</TableCell>
-                                                    <TableCell align="left">{row.quantityValue}</TableCell>
-                                                    <TableCell align="center">
-                                                        {selected.length <= 0 &&
-                                                            <Box display="flex">
-                                                                <Tooltip title="إخفاء">
-                                                                    <IconButton aria-label="إخفاء" onClick={() => handleToggleProduct(row)}>
-                                                                        {row.isAvailableForPurchase ? <VisibilityOffIcon color="primary" /> : <VisibilityIcon color="primary" />}
-                                                                    </IconButton>
-                                                                </Tooltip>
-                                                                <Tooltip title="تعديل">
-                                                                    <IconButton aria-label="تعديل" onClick={() => handleOpenBundleFormOnClick(row, UI_FROM_MODE.EDIT)} >
-                                                                        <EditIcon color="primary" />
-                                                                    </IconButton>
-                                                                </Tooltip>
-                                                                <Tooltip title="عرض التفاصيل" onClick={() => handleOpenBundleFormOnClick(row, UI_FROM_MODE.VIEW)} >
-                                                                    <IconButton aria-label="عرض التفاصيل">
-                                                                        <ChevronLeftIcon color="secondary" />
-                                                                    </IconButton>
-                                                                </Tooltip>
-                                                            </Box>
-                                                        }
-                                                    </TableCell>
-
-                                                </TableRow>
-                                            );
-                                        })}
-                                        <ConfirmDialog
-                                            title={confirmDialogTitle}
-                                            message={confirmDialogMessage}
-                                            sumbit={confirmDialogSubmit}
-                                            onCancel={handleConfirmDialogCancel}
-                                            onSubmit={onSubmit}
-                                            open={openConfirmDialog}
+                            {products.length > 0 ?
+                                <TableContainer>
+                                    <Table
+                                        className={classes.table}
+                                        aria-labelledby="tableTitle"
+                                        size={dense ? 'small' : 'medium'}
+                                        aria-label="enhanced table"
+                                    >
+                                        <EnhancedTableHead
+                                            classes={classes}
+                                            numSelected={selected.length}
+                                            order={order}
+                                            orderBy={orderBy}
+                                            onSelectAllClick={handleSelectAllClick}
+                                            onRequestSort={handleRequestSort}
+                                            rowCount={products.length}
                                         />
-                                        <Drawer
-                                            variant="temporary"
-                                            open={openProductDetails}
-                                            anchor="right"
-                                        >
-                                            <BundleForm toggleOpenBundleForm={toggleOpenProductDetails} mode={fromMode} />
+                                        <TableBody>
+                                            {/* {stableSort(products, getComparator(order, orderBy))
+                                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
+                                            {products.map((row: TProduct, index: number) => {
+                                                const isItemSelected = isSelected(row);
+                                                const labelId = `enhanced-table-checkbox-${index}`;
+                                                return (
+                                                    <TableRow
+                                                        hover
+                                                        role="checkbox"
+                                                        aria-checked={isItemSelected}
+                                                        tabIndex={-1}
+                                                        key={row.id}
+                                                        selected={isItemSelected}
 
-                                        </Drawer>
-                                        {emptyRows > 0 && (
-                                            <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                                                <TableCell colSpan={6} />
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
+                                                    >
+                                                        <TableCell padding="checkbox">
+                                                            <Checkbox
+                                                                onClick={(event) => handleClick(event, row)}
+                                                                checked={isItemSelected}
+                                                                inputProps={{ 'aria-labelledby': labelId }}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell component="th" id={labelId} scope="row" padding="none">
+                                                            {row.arName}
+                                                        </TableCell>
+                                                        <TableCell align="left"><Avatar variant="square">
+                                                            {row.thumbnailBase64 ? <CardMedia
+                                                                // className={classes.cover}
+                                                                component="img"
+                                                                image={`data:image/png;base64,${row.thumbnailBase64}`}
+                                                                title="Main Product Image"
+                                                            /> : <ImageIcon />}
+                                                        </Avatar></TableCell>
+                                                        <TableCell align="left"><Avatar variant="square">
+                                                            {row.thumbnailBase64 ? <CardMedia
+                                                                // className={classes.cover}
+                                                                component="img"
+                                                                image={`data:image/png;base64,${row.thumbnailBase64}`}
+                                                                title="Main Product Image"
+                                                            /> : <ImageIcon />}
+                                                        </Avatar></TableCell>
+                                                        <TableCell align="left">{row.unitPrice}</TableCell>
+                                                        <TableCell align="left">{row.quantityValue}</TableCell>
+                                                        <TableCell align="center">
+                                                            {selected.length <= 0 &&
+                                                                <Box display="flex">
+                                                                    <Tooltip title="إخفاء">
+                                                                        <IconButton aria-label="إخفاء" onClick={() => handleToggleProduct(row)}>
+                                                                            {row.isAvailableForPurchase ? <VisibilityOffIcon color="primary" /> : <VisibilityIcon color="primary" />}
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                    <Tooltip title="تعديل">
+                                                                        <IconButton aria-label="تعديل" onClick={() => handleOpenBundleFormOnClick(row, UI_FROM_MODE.EDIT)} >
+                                                                            <EditIcon color="primary" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                    <Tooltip title="عرض التفاصيل" onClick={() => handleOpenBundleFormOnClick(row, UI_FROM_MODE.VIEW)} >
+                                                                        <IconButton aria-label="عرض التفاصيل">
+                                                                            <ChevronLeftIcon color="secondary" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                </Box>
+                                                            }
+                                                        </TableCell>
+
+                                                    </TableRow>
+                                                );
+                                            })}
+                                            <ConfirmDialog
+                                                title={confirmDialogTitle}
+                                                message={confirmDialogMessage}
+                                                sumbit={confirmDialogSubmit}
+                                                onCancel={handleConfirmDialogCancel}
+                                                onSubmit={onSubmit}
+                                                open={openConfirmDialog}
+                                            />
+                                            <Drawer
+                                                variant="temporary"
+                                                open={openProductDetails}
+                                                anchor="right"
+                                            >
+                                                <BundleForm toggleOpenBundleForm={toggleOpenProductDetails} mode={fromMode} />
+
+                                            </Drawer>
+                                            {emptyRows > 0 && (
+                                                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
+                                                    <TableCell colSpan={6} />
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+
+                                    </Table>
+                                </TableContainer>
+                                : (<Box className={classes.noItemsText} display="flex" justifyContent="center" alignItems="center">
+                                    <Typography>لا يوجد منتجات</Typography>
+                                </Box>)}
                             <TablePagination
                                 rowsPerPageOptions={[5, 10, 25 < products.length ? 25 : products.length]}
                                 component="div"

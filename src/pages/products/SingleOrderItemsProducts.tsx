@@ -92,6 +92,7 @@ interface HeadCell {
 
 const headCells: HeadCell[] = [
     { id: 'arName', numeric: false, disablePadding: true, label: 'الإسم' },
+    { id: 'thumbnailBase64', numeric: false, disablePadding: false, label: 'صورة المنتج' },
     { id: 'unitPrice', numeric: true, disablePadding: false, label: 'سعر الوحدة' },
     { id: 'quantityValue', numeric: true, disablePadding: false, label: 'الكمية الافتراضية' },
 ];
@@ -330,6 +331,10 @@ const useStyles = makeStyles((theme: Theme) =>
             top: 20,
             width: 1,
         },
+        noItemsText: {
+            width: "100%",
+            height: "400px",
+        }
     }),
 );
 
@@ -469,7 +474,7 @@ export default function SingleOrderItemsProducts() {
                 <EnhancedTableToolbar selectedIds={selected} />
                 {isLoadingProducts ? (<LoadingIndicator width="100%" height="400px" />)
                     : (
-                        <>
+                        <> {products.length > 0 ?
                             <TableContainer>
                                 <Table
                                     className={classes.table}
@@ -573,6 +578,9 @@ export default function SingleOrderItemsProducts() {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
+                            : (<Box className={classes.noItemsText} display="flex" justifyContent="center" alignItems="center">
+                                <Typography>لا يوجد</Typography>
+                            </Box>)}
                             <TablePagination
                                 rowsPerPageOptions={[5, 10, 25 < products.length ? 25 : products.length]}
                                 component="div"

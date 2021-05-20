@@ -32,6 +32,15 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     paddingRight_1: { paddingRight: theme.spacing(1) },
     saveButton: { marginBottom: theme.spacing(1) },
+    mapWrapper: {
+        width: "100%",
+        overflow: "hidden",
+        height: "649.347px",
+        border: "1px solid",
+        position: "relative",
+        outline: "none",
+        padding: theme.spacing(1),
+    },
 }));
 
 
@@ -284,9 +293,12 @@ const AddressForm = (props: Props) => {
                     </Grid>
                 </Grid>
                 <Grid item xs={12} md={mdSize}>
-                    <MapLocator
-                        updateLatitude={setLatitude}
-                        updateLongitude={setLongitude} />
+                    <div className={classes.mapWrapper}>
+
+                        <MapLocator
+                            updateLatitude={setLatitude}
+                            updateLongitude={setLongitude} />
+                    </div>
                 </Grid>
             </Grid>
         </div>
