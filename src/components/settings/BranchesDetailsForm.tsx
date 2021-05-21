@@ -80,6 +80,7 @@ const BranchesDetailsForm = (props: Props) => {
     });
     // const [isFormValid, setIsFormValid] = React.useState<boolean>(false);
     const [isFormValid, setIsFormValid] = React.useState<boolean>(true);
+    const [isAddressFormValid, setIsAddressFormValid] = React.useState<boolean>(true);
 
     const loadBranchesList: () => void = () => {
         getBranchesList().then((res: AxiosResponse) => {
@@ -113,7 +114,7 @@ const BranchesDetailsForm = (props: Props) => {
         }
     }, [selectedBranch])
 
-    const handleSubmit = () => {
+    const __handleSubmit = () => {
         console.log({
             enName,
             arName,
@@ -121,7 +122,7 @@ const BranchesDetailsForm = (props: Props) => {
         });
 
     }
-    const __handleSubmit = () => {
+    const handleSubmit = () => {
         setIsFormValid(false);
         dispatch({
             type: BranchesActionTypes.SET_IS_LOADING_BRANCHES,
@@ -143,6 +144,19 @@ const BranchesDetailsForm = (props: Props) => {
                 break;
         }
     };
+
+    React.useEffect(() => {
+        console.log({isAddressFormValid});
+        
+        setIsFormValid(enName !== '' &&
+            isAddressFormValid &&
+            arName !== '')
+
+    }, [enName,
+        address,
+        arName])
+
+
     return (
         <Drawer
             variant="temporary"
@@ -200,7 +214,7 @@ const BranchesDetailsForm = (props: Props) => {
                     </Grid>
                 </Grid>
                 <Typography variant="h5" className={classes.addressTitle}>عنوان الفرع</Typography>
-                <AddressForm address={address} setAddress={setAddress} mode={mode} mdSize={6} />
+                <AddressForm updateFormValid={setIsAddressFormValid} address={address} setAddress={setAddress} mode={mode} mdSize={6} />
                 {/* {mode === UI_FROM_MODE.VIEW && selectedBranch?.products?.length > 0 &&
                     < List >
                     {selectedBranch?.products?.map((product: TProduct) => (

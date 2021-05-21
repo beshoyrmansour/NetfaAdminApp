@@ -37,6 +37,7 @@ interface Props {
     // setAddress: (TAddress) => TAddress
     setAddress: any;
     mdSize: any;
+    updateFormValid: any;
     mode: UI_FROM_MODE;
 
 }
@@ -44,7 +45,7 @@ interface Props {
 const AddressForm = (props: Props) => {
     const classes = useStyles();
 
-    const { address, setAddress, mode, mdSize = 6 } = props;
+    const { address, setAddress, mode, mdSize = 6, updateFormValid } = props;
 
     const [addressTitle, setAddressTitle] = React.useState<string>(address?.addressTitle || '');
     const [buildingNumber, setBuildingNumber] = React.useState<string>(address?.buildingNumber || '');
@@ -83,6 +84,10 @@ const AddressForm = (props: Props) => {
     }
 
     const handleAddressChange = (name: string, value: any) => {
+        console.log(
+            { [name]: value }
+        );
+
         setAddress((prevAaddress: TAddress) => ({ ...prevAaddress, [name]: value }))
     }
 
@@ -142,6 +147,31 @@ const AddressForm = (props: Props) => {
         handleAddressChange("latitude", latitude);
     }, [latitude])
 
+    React.useEffect(() => {
+        updateFormValid(
+            addressTitle !== '' &&
+            buildingNumber !== '' &&
+            streetName !== '' &&
+            neighbourhood !== '' &&
+            state !== '' &&
+            unitNumber !== '' &&
+            recipientPhoneNumber !== '' &&
+            latitude !== undefined &&
+            longitude !== undefined
+        )
+
+    }, [
+        addressTitle,
+        buildingNumber,
+        streetName,
+        neighbourhood,
+        state,
+        unitNumber,
+        recipientPhoneNumber,
+        latitude,
+        longitude
+    ])
+
     return (
         <div>
             <Grid direction="row" container
@@ -197,7 +227,7 @@ const AddressForm = (props: Props) => {
                             }}
                             type="text"
                             value={streetName}
-                            name="streetNameber"
+                            name="streetName"
                             onChange={handleStreetNameChange}
                         />
                     </Grid>
@@ -231,7 +261,7 @@ const AddressForm = (props: Props) => {
                             }}
                             type="text"
                             value={state}
-                            name="statengNumber"
+                            name="state"
                             onChange={handleStateChange}
                         />
                     </Grid>
