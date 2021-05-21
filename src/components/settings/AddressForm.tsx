@@ -1,20 +1,9 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { UI_FROM_MODE } from '../../models/configs';
-import { AppState } from '../../redux/store';
 
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import Drawer from '@material-ui/core/Drawer';
-import EditIcon from '@material-ui/icons/Edit';
-import CloseIcon from '@material-ui/icons/Close';
 import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
 import { TAddress } from '../../models/Branches';
 import MapLocator from '../MapLocator';
 
@@ -35,11 +24,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     mapWrapper: {
         width: "100%",
         overflow: "hidden",
-        height: "649.347px",
+        height: "440px",
         border: "1px solid",
-        position: "relative",
-        outline: "none",
         padding: theme.spacing(1),
+        borderRadius: "4px",
     },
 }));
 
@@ -67,10 +55,32 @@ const AddressForm = (props: Props) => {
     const [floorNumber, setFloorNumber] = React.useState<string>(address?.floorNumber || '');
     const [recipientPhoneNumber, setRecipientPhoneNumber] = React.useState<string>(address?.recipientPhoneNumber || '');
     const [nearestLandMark, setNearestLandMark] = React.useState<string>(address?.nearestLandMark || '');
-    const [latitude, setLatitude] = React.useState<number>(address?.latitude || 0);
-    const [longitude, setLongitude] = React.useState<number>(address?.longitude || 0);
+    const [latitude, setLatitude] = React.useState<number>(address?.latitude || 21.6274891);
+    const [longitude, setLongitude] = React.useState<number>(address?.longitude || 39.1396403);
+    const [gMapsLink, setGMapsLink] = React.useState<string>("");
+
 
     const [isFormValid, setIsFormValid] = React.useState<boolean>(false);
+
+
+    const extractLocationFromLink = (link: string = "https://www.google.com/maps?q=29.9849710,31.1451910&hl=en-EG&gl=eg&entry=gps&lucs=swa") => {
+        /* https://www.google.com/maps?q=29.9849710,31.1451910&hl=en-EG&gl=eg&entry=gps&lucs=swa */
+        /* https://www.google.com/maps/place/29%C2%B059'05.9%22N+31%C2%B008'42.7%22E/@29.984971,31.1430023,17z/data=!4m5!3m4!1s0x0:0x0!8m2!3d29.984971!4d31.145191?hl=en-EG */
+        const _link = link.split('?q=');
+        if (_link.length > 1) {
+            setLatitude(parseFloat(_link[1].split(',')[0]));
+            setLongitude(parseFloat(_link[1].split(',')[1].split('&h')[0]));
+        } else {
+            const _link = link.split('/@');
+            if (_link.length > 1) {
+                setLatitude(parseFloat(_link[1].split(',')[0]));
+                setLongitude(parseFloat(_link[1].split(',')[1].split('z/')[0]));
+
+            }
+        }
+
+
+    }
 
     const handleAddressChange = (name: string, value: any) => {
         setAddress((prevAaddress: TAddress) => ({ ...prevAaddress, [name]: value }))
@@ -106,11 +116,11 @@ const AddressForm = (props: Props) => {
     }
     const handleLatitudeChange = (event: React.ChangeEvent<{ value: unknown, name: string }>) => {
         setLatitude(event.target.value as number);
-        handleAddressChange(event.target.name, event.target.value as string);
+        handleAddressChange(event.target.name, event.target.value as number);
     }
     const handleLongitudeChange = (event: React.ChangeEvent<{ value: unknown, name: string }>) => {
         setLongitude(event.target.value as number);
-        handleAddressChange(event.target.name, event.target.value as string);
+        handleAddressChange(event.target.name, event.target.value as number);
     }
     const handleRecipientPhoneNumberChange = (event: React.ChangeEvent<{ value: unknown, name: string }>) => {
         setRecipientPhoneNumber(event.target.value as string);
@@ -120,19 +130,29 @@ const AddressForm = (props: Props) => {
         setNearestLandMark(event.target.value as string);
         handleAddressChange(event.target.name, event.target.value as string);
     }
+    const handleGMapsLinkChange = (event: React.ChangeEvent<{ value: unknown, name: string }>) => {
+        setGMapsLink(event.target.value as string);
+        // handleAddressChange(event.target.name, event.target.value as string);
+        extractLocationFromLink(gMapsLink)
+    }
+    React.useEffect(() => {
+        handleAddressChange("longitude", longitude);
+    }, [longitude])
+    React.useEffect(() => {
+        handleAddressChange("latitude", latitude);
+    }, [latitude])
 
     return (
         <div>
             <Grid direction="row" container
                 justify="flex-start"
-                alignItems="center"
+                alignItems="baseline"
                 spacing={2}>
                 <Grid item xs={12} md={mdSize}>
                     <Grid item xs={12} md={12}>
                         <TextField
                             className={classes.textField}
                             required
-                            multiline
                             fullWidth
                             id="outlined-required"
                             label="أسم العنوان"
@@ -151,7 +171,6 @@ const AddressForm = (props: Props) => {
                         <TextField
                             className={classes.textField}
                             required
-                            multiline
                             fullWidth
                             id="outlined-required"
                             label="رقم البناء"
@@ -169,7 +188,6 @@ const AddressForm = (props: Props) => {
                         <TextField
                             className={classes.textField}
                             required
-                            multiline
                             fullWidth
                             id="outlined-required"
                             label="اسم الشارع"
@@ -187,7 +205,6 @@ const AddressForm = (props: Props) => {
                         <TextField
                             className={classes.textField}
                             required
-                            multiline
                             fullWidth
                             id="outlined-required"
                             label="اسم الحي"
@@ -205,7 +222,6 @@ const AddressForm = (props: Props) => {
                         <TextField
                             className={classes.textField}
                             required
-                            multiline
                             fullWidth
                             id="outlined-required"
                             label="اسم المدينة"
@@ -223,7 +239,6 @@ const AddressForm = (props: Props) => {
                         <TextField
                             className={classes.textField}
                             required
-                            multiline
                             fullWidth
                             id="outlined-required"
                             label="رقم الوحدة"
@@ -240,8 +255,6 @@ const AddressForm = (props: Props) => {
                     <Grid item xs={12} md={12}>
                         <TextField
                             className={classes.textField}
-                            required
-                            multiline
                             fullWidth
                             id="outlined-required"
                             label="رقم الدور"
@@ -258,7 +271,6 @@ const AddressForm = (props: Props) => {
                     <Grid item xs={12} md={12}>
                         <TextField
                             className={classes.textField}
-                            required
                             multiline
                             fullWidth
                             id="outlined-required"
@@ -267,7 +279,7 @@ const AddressForm = (props: Props) => {
                             InputProps={{
                                 readOnly: mode === UI_FROM_MODE.VIEW,
                             }}
-                            type="text"
+                            type=""
                             value={recipientPhoneNumber}
                             name="recipientPhoneNumber"
                             onChange={handleRecipientPhoneNumberChange}
@@ -276,7 +288,6 @@ const AddressForm = (props: Props) => {
                     <Grid item xs={12} md={12}>
                         <TextField
                             className={classes.textField}
-                            required
                             multiline
                             fullWidth
                             id="outlined-required"
@@ -293,9 +304,70 @@ const AddressForm = (props: Props) => {
                     </Grid>
                 </Grid>
                 <Grid item xs={12} md={mdSize}>
-                    <div className={classes.mapWrapper}>
+                    <Grid direction="row" container
+                        justify="flex-start"
+                        alignItems="center"
+                        spacing={2}>
+                        <Grid item xs={12} md={12}>
+                            <TextField
+                                className={classes.textField}
+                                multiline
+                                fullWidth
+                                id="outlined-required"
+                                label="رابط الموقع"
+                                variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
+                                InputProps={{
+                                    readOnly: mode === UI_FROM_MODE.VIEW,
+                                }}
+                                type="text"
+                                value={gMapsLink}
+                                name="nearestLandMark"
+                                onChange={handleGMapsLinkChange}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                className={classes.textField}
+                                required
+                                fullWidth
+                                id="outlined-required"
+                                label="خط العرض"
+                                variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
+                                InputProps={{
+                                    readOnly: mode === UI_FROM_MODE.VIEW,
+                                }}
+                                type="number"
+                                value={latitude}
+                                name="latitude"
+                                onChange={handleLatitudeChange}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                className={classes.textField}
+                                fullWidth
+                                required
+                                id="outlined-required"
+                                label="خط الطول"
+                                variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
+                                InputProps={{
+                                    readOnly: mode === UI_FROM_MODE.VIEW,
+                                }}
+                                type="number"
+                                value={longitude}
+                                name="longitude"
+                                onChange={handleLongitudeChange}
+                            />
+                        </Grid>
+                    </Grid>
 
+                    <div className={classes.mapWrapper}>
+                        {/* <Typography component="span" variant="h5">{latitude}</Typography>
+                        <Typography component="span" variant="h5">{"----------"}</Typography>
+                        <Typography component="span" variant="h5">{longitude}</Typography> */}
                         <MapLocator
+                            latitude={latitude}
+                            longitude={longitude}
                             updateLatitude={setLatitude}
                             updateLongitude={setLongitude} />
                     </div>
