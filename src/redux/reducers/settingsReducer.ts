@@ -1,5 +1,6 @@
 import { UI_FROM_MODE } from "../../models/configs";
 import { SettingActionTypes, TSettingAction, TSettingReducer } from "../../models/Settings";
+import { BranchesActionTypes } from "../../models/Branches";
 
 export const settingInitReducerState: TSettingReducer = {
     quantities: [],
@@ -90,6 +91,43 @@ export const settingsReducer = (state: TSettingReducer = settingInitReducerState
             return {
                 ...state,
                 quantityActiveMode: action.payload
+            }
+        // BRANCHES
+
+        case BranchesActionTypes.SET_IS_LOADING_BRANCHES:
+            return {
+                ...state,
+                isLoadingBranches: action.payload
+            }
+
+        case BranchesActionTypes.SET_IS_LOADING_SELECTED_BRANCH:
+            return {
+                ...state,
+                isLoadingSelectedBranch: action.payload
+            }
+
+        case BranchesActionTypes.FETCH_ALL_BRANCHES:
+            console.log({
+                DATA: action.payload
+            });
+
+            return {
+                ...state,
+                isLoadingBranches: false,
+                branches: action.payload
+            }
+
+        case BranchesActionTypes.SET_SELECTED_BRANCH:
+            return {
+                ...state,
+                isLoadingSelectedBranch: false,
+                selectedBranch: action.payload
+            }
+
+        case BranchesActionTypes.SET_BRANCH_ACTIVE_MODE:
+            return {
+                ...state,
+                branchActiveMode: action.payload
             }
 
 

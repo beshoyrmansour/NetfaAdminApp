@@ -24,7 +24,7 @@ import Avatar from '@material-ui/core/Avatar';
 import ImageIcon from '@material-ui/icons/Image';
 import CardMedia from '@material-ui/core/CardMedia';
 import { BranchesActionTypes, TAddress, TBranch } from '../../models/Branches';
-import { addNewBranch, editBranch, getBranchesList } from '../../redux/actions/branchActions';
+import { addNewBranch, editBranch, getBranchesList, loadBranchesList } from '../../redux/actions/branchActions';
 import { AxiosResponse } from 'axios';
 import AddressForm from './AddressForm';
 
@@ -82,17 +82,7 @@ const BranchesDetailsForm = (props: Props) => {
     const [isFormValid, setIsFormValid] = React.useState<boolean>(true);
     const [isAddressFormValid, setIsAddressFormValid] = React.useState<boolean>(true);
 
-    const loadBranchesList: () => void = () => {
-        getBranchesList().then((res: AxiosResponse) => {
-            if (res.status === 200) {
-                dispatch({
-                    type: BranchesActionTypes.FETCH_ALL_BRANCHES,
-                    payload: res.data
-                })
-                handleClose();
-            }
-        })
-    }
+
     const handleEnNameChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setEnName(event.target.value as string)
     }
@@ -100,9 +90,7 @@ const BranchesDetailsForm = (props: Props) => {
         setArName(event.target.value as string)
     }
 
-    React.useEffect(() => {
-        loadBranchesList()
-    }, [])
+
     React.useEffect(() => {
         setEnName(selectedBranch?.enBranchName)
         setArName(selectedBranch?.arBranchName)
@@ -131,12 +119,14 @@ const BranchesDetailsForm = (props: Props) => {
         switch (mode) {
             case UI_FROM_MODE.NEW:
                 addNewBranch(enName, arName, address).then(res => {
-                    loadBranchesList()
+                    loadBranchesList(dispatch)
+                    handleClose();
                 })
                 break;
             case UI_FROM_MODE.EDIT:
                 editBranch(enName, arName, address, selectedBranch.id as number).then(res => {
-                    loadBranchesList()
+                    loadBranchesList(dispatch)
+                    handleClose();
                 })
                 break; break;
 
@@ -146,8 +136,8 @@ const BranchesDetailsForm = (props: Props) => {
     };
 
     React.useEffect(() => {
-        console.log({isAddressFormValid});
-        
+        console.log({ isAddressFormValid });
+
         setIsFormValid(enName !== '' &&
             isAddressFormValid &&
             arName !== '')

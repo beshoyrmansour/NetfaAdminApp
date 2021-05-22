@@ -1,10 +1,12 @@
+import { AxiosResponse } from "axios";
 import axios from "../../api/axios";
 import END_POINTS from '../../api/endPoints';
 import {
     IGetBranchesListReq,
     IAddNewBranchReq,
     IEditBranchReq,
-    IDeleteBranchReq
+    IDeleteBranchReq,
+    BranchesActionTypes
 } from "../../models/Branches";
 
 export const getBranchesList: IGetBranchesListReq = () => {
@@ -37,3 +39,14 @@ export const deleteBranch: IDeleteBranchReq = (branchId) => {
     return axios.delete(END_POINTS.BRANCHES + `/${branchId}`)
 }
 
+export const loadBranchesList: (dispatch: any) => void = (dispatch) => {
+    getBranchesList().then((res: AxiosResponse) => {
+
+        if (res.status === 200) {
+            dispatch({
+                type: BranchesActionTypes.FETCH_ALL_BRANCHES,
+                payload: res.data
+            })
+        }
+    })
+}

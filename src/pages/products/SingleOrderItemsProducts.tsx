@@ -220,7 +220,6 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
 
     const handleDeleteProducts = () => {
 
-        console.log({ selectredProduct });
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد حذف ${selectredProduct.length} المنتجات قائمة المنتجات علي التطبيق`);
         setConfirmDialogSubmit('حذف');
@@ -268,7 +267,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
                             <VisibilityOffIcon />
                         </IconButton>
                     </Tooltip>} */}
-                    <Tooltip title="Delete">
+                    <Tooltip title="حذف">
                         <IconButton aria-label="delete" onClick={handleDeleteProducts}>
                             <DeleteIcon />
                         </IconButton>

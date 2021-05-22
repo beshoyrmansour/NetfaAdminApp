@@ -1,4 +1,4 @@
-import { TBranch } from "./Branches";
+import { BranchesActionTypes, TBranch } from "./Branches";
 import { TCategory } from "./Categories";
 import { UI_FROM_MODE } from "./configs";
 import { TQuantity } from "./Quantity";
@@ -18,7 +18,7 @@ export enum SettingActionTypes {
 }
 
 export type TSettingAction = {
-    type: SettingActionTypes;
+    type: SettingActionTypes | BranchesActionTypes;
     payload?: any;
 };
 

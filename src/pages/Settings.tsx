@@ -57,6 +57,32 @@ const Settings = (props: Props) => {
 
     return (
         <Grid container spacing={3}>
+            <Grid item xs={12} lg={12}>
+                <Paper className={classes.paper}>
+                    <Box display="flex" alignItems="center" justifyContent="space-between" width={"100%"}>
+                        <Typography variant="h4">
+                            الفروع
+                    </Typography>
+                        <Tooltip title="إضافة فئة منتجات جديدة">
+
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                endIcon={<AddIcon />}
+                                onClick={toggleOpenAddBranch}
+                            >
+                                <Typography noWrap> إضافة جديد </Typography>
+                            </Button>
+                        </Tooltip>
+                    </Box>
+                    <BranchesList />
+                    <BranchesDetailsForm
+                        open={openAddBranch}
+                        handleClose={() => setOpenAddBranch(false)}
+                        mode={UI_FROM_MODE.NEW}
+                    />
+                </Paper>
+            </Grid>
             <Grid item xs={12} lg={6}>
                 <Paper className={classes.paper}>
                     <Box display="flex" alignItems="center" justifyContent="space-between" width={"100%"}>
@@ -106,32 +132,7 @@ const Settings = (props: Props) => {
                     />
                 </Paper>
             </Grid>
-            <Grid item xs={12} lg={12}>
-                <Paper className={classes.paper}>
-                    <Box display="flex" alignItems="center" justifyContent="space-between" width={"100%"}>
-                        <Typography variant="h4">
-                            الفروع
-                    </Typography>
-                        <Tooltip title="إضافة فئة منتجات جديدة">
 
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                endIcon={<AddIcon />}
-                                onClick={toggleOpenAddBranch}
-                            >
-                                <Typography noWrap> إضافة جديد </Typography>
-                            </Button>
-                        </Tooltip>
-                    </Box>
-                    <BranchesList />
-                    <BranchesDetailsForm
-                        open={openAddBranch}
-                        handleClose={() => setOpenAddBranch(false)}
-                        mode={UI_FROM_MODE.NEW}
-                    />
-                </Paper>
-            </Grid>
         </Grid>
     )
 }
