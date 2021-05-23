@@ -22,6 +22,10 @@ export interface IAddNewQuantityReq {
     (enName: string, arName: string, value: number): Promise<AxiosResponse>
 }
 
+export interface IEditQuantityReq {
+    (enName: string, arName: string, value: number, categoryId: number): Promise<AxiosResponse>
+}
+
 export interface IDeleteQuantityReq {
     (quantity: TQuantity): Promise<AxiosResponse>
 }

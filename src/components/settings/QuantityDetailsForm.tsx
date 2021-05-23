@@ -1,6 +1,6 @@
 import React from 'react';
 import { AxiosResponse } from 'axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Drawer from '@material-ui/core/Drawer';
@@ -13,7 +13,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { SettingActionTypes } from '../../models/Settings';
-import { addNewQuantity, getQuantitiesList } from '../../redux/actions/settingActions';
+import { addNewQuantity, editQuantity, loadQuantitiesList } from '../../redux/actions/settingActions';
+import { UI_FROM_MODE } from '../../models/configs';
+import { AppState } from '../../redux/store';
 
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -28,12 +30,13 @@ const useStyles = makeStyles((theme: Theme) => ({
         marginBottom: '1.2rem'
     },
     paddingRight_1: { paddingRight: theme.spacing(1) },
-    saveButton: { marginBottom:theme.spacing(1) },
+    saveButton: { marginBottom: theme.spacing(1) },
 }));
 
 interface Props {
     open: boolean;
     handleClose: () => void;
+    mode: UI_FROM_MODE,
 }
 
 const QuantityDetailsForm = (props: Props) => {
@@ -41,8 +44,12 @@ const QuantityDetailsForm = (props: Props) => {
     const dispatch = useDispatch();
     const {
         open,
-        handleClose
+        handleClose,
+        mode
     } = props;
+
+    const selectedQuantity = useSelector((state: AppState) => state.settings.selectedQuantity);
+    const isLoadingSelectedQuantity = useSelector((state: AppState) => state.settings.isLoadingSelectedQuantity);
 
     const [value, setValue] = React.useState<number | undefined>(undefined);
     const [enName, setEnName] = React.useState<string>('');
@@ -61,22 +68,33 @@ const QuantityDetailsForm = (props: Props) => {
             setValue(event.target.value as number || 1)
     }
 
+    React.useEffect(() => {
+        setEnName(selectedQuantity.enName)
+        setArName(selectedQuantity.arName)
+        setValue(selectedQuantity.value)
+    }, [selectedQuantity])
+
     const handleSubmit = () => {
         dispatch({
             type: SettingActionTypes.SET_IS_LOADING_QUANTITIES,
             payload: true
         });
-        addNewQuantity(enName, arName, value as number).then(res => {
-            getQuantitiesList().then((res: AxiosResponse) => {
-                if (res.status === 200) {
-                    dispatch({
-                        type: SettingActionTypes.FETCH_ALL_QUANTITIES,
-                        payload: res.data
-                    })
+        switch (mode) {
+            case UI_FROM_MODE.NEW:
+                addNewQuantity(enName, arName, value as number).then(res => {
+                    loadQuantitiesList(dispatch);
+                });
+                break;
+            case UI_FROM_MODE.EDIT:
+                editQuantity(enName, arName, value as number, selectedQuantity.id).then(res => {
+                    loadQuantitiesList(dispatch);
                     handleClose();
-                }
-            })
-        })
+                })
+                break; break;
+
+            default:
+                break;
+        }
     };
 
     React.useEffect(() => {
@@ -113,11 +131,12 @@ const QuantityDetailsForm = (props: Props) => {
                             fullWidth
                             id="outlined-required"
                             label="اسم الوحدة بالعرية"
-                            variant="standard"
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
                             type="number"
                             value={arName}
                             onChange={handleArNameChange}
                             InputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
                             }}
                         />
                     </Grid>
@@ -129,11 +148,12 @@ const QuantityDetailsForm = (props: Props) => {
                             fullWidth
                             id="outlined-required"
                             label="اسم الوحدة بالإنجليزية"
-                            variant="standard"
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
                             type="number"
                             value={enName}
                             onChange={handleEnNameChange}
                             InputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
                             }}
                         />
                     </Grid>
@@ -145,11 +165,12 @@ const QuantityDetailsForm = (props: Props) => {
                             fullWidth
                             id="outlined-required"
                             label="القيمة"
-                            variant="standard"
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
                             type="number"
                             value={value}
                             onChange={handleValueChange}
                             InputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
                             }}
                         />
 

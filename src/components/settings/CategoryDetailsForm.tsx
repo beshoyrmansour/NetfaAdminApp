@@ -22,7 +22,7 @@ import ImageIcon from '@material-ui/icons/Image';
 import CardMedia from '@material-ui/core/CardMedia';
 
 import { makeStyles, Theme } from '@material-ui/core/styles';
-import { addNewCategory, getCategoriesList, editCategory } from '../../redux/actions/categoriesActions';
+import { addNewCategory, getCategoriesList, editCategory, loadCategoriesList } from '../../redux/actions/categoriesActions';
 import { SettingActionTypes } from '../../models/Settings';
 import { UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
@@ -73,23 +73,7 @@ const CategoryDetailsForm = (props: Props) => {
         setEnName(selectedCategory.enName)
         setArName(selectedCategory.arName)
         console.log({ mode, VIEW: UI_FROM_MODE.VIEW, ISVIEW: mode === UI_FROM_MODE.VIEW });
-
-        return () => {
-
-        }
     }, [selectedCategory])
-
-    const loadCategoriesList: () => void = () => {
-        getCategoriesList().then((res: AxiosResponse) => {
-            if (res.status === 200) {
-                dispatch({
-                    type: SettingActionTypes.FETCH_ALL_CATEGORIES,
-                    payload: res.data.categories
-                })
-                handleClose();
-            }
-        })
-    }
 
     const handleSubmit = () => {
         setIsFormValid(false);
@@ -100,12 +84,14 @@ const CategoryDetailsForm = (props: Props) => {
         switch (mode) {
             case UI_FROM_MODE.NEW:
                 addNewCategory(enName, arName).then(res => {
-                    loadCategoriesList()
+                    loadCategoriesList(dispatch);
+                    handleClose();
                 })
                 break;
             case UI_FROM_MODE.EDIT:
                 editCategory(enName, arName, selectedCategory.id).then(res => {
-                    loadCategoriesList()
+                    loadCategoriesList(dispatch);
+                    handleClose();
                 })
                 break; break;
 

@@ -24,6 +24,8 @@ import { AxiosResponse } from 'axios';
 import { SettingActionTypes } from '../../models/Settings';
 import LoadingIndicator from '../LoadingIndicator';
 import ConfirmDialog from '../ConfirmDialog';
+import QuantityDetailsForm from './QuantityDetailsForm';
+import { UI_FROM_MODE } from '../../models/configs';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -55,6 +57,8 @@ const QuantitiesList = (props: Props) => {
     const [openConfirmDialog, setOpenConfirmDialog] = React.useState<boolean>(false);
     const [selectedQuantity, setSelectedQuantity] = React.useState<TQuantity | null>(null);
     const [onSubmit, setOnSubmit] = React.useState<() => void>(() => { });
+    const [openForm, setOpenForm] = React.useState<boolean>(false);
+    const [formMode, setFormMode] = React.useState<UI_FROM_MODE>(UI_FROM_MODE.VIEW);
 
     const quantities = useSelector((state: AppState) => state.settings.quantities);
     const isLoadingQuantities = useSelector((state: AppState) => state.settings.isLoadingQuantities);
@@ -106,18 +110,26 @@ const QuantitiesList = (props: Props) => {
     }
 
     const handleEditQuantity: (quantity: TQuantity) => void = (quantity) => {
-        
+        setFormMode(UI_FROM_MODE.EDIT)
+        setOpenForm(true);
+        dispatch({
+            type: SettingActionTypes.SET_SELECTED_QUANTITY,
+            payload: quantity
+        })
     }
 
     const handleViewQuantity: (quantity: TQuantity) => void = (quantity) => {
-
+        setFormMode(UI_FROM_MODE.VIEW)
+        setOpenForm(true);
+        dispatch({
+            type: SettingActionTypes.SET_SELECTED_QUANTITY,
+            payload: quantity
+        })
     }
 
     const handleConfirmDialogCancel: () => void = () => {
         console.log({ handleConfirmDialogCancel: selectedQuantity });
         setOpenConfirmDialog(false);
-
-        console.log({ selectedQuantity });
     }
 
     return (
@@ -155,6 +167,10 @@ const QuantitiesList = (props: Props) => {
                 onSubmit={onSubmit}
                 open={openConfirmDialog}
             />
+            <QuantityDetailsForm
+                open={openForm}
+                handleClose={() => { setOpenForm(false) }}
+                mode={formMode} />
         </>
     )
 }

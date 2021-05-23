@@ -18,7 +18,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../redux/store';
-import { getCategoriesList, deleteCategory } from '../../redux/actions/categoriesActions';
+import { getCategoriesList, deleteCategory, loadCategoriesList } from '../../redux/actions/categoriesActions';
 import { AxiosResponse } from 'axios';
 import { SettingActionTypes } from '../../models/Settings';
 import LoadingIndicator from '../LoadingIndicator';
@@ -63,23 +63,12 @@ const CategoriesList = (props: Props) => {
     const isLoadingCategories = useSelector((state: AppState) => state.settings.isLoadingCategories);
 
 
-    const loadCategoriesList: () => void = () => {
-        getCategoriesList().then((res: AxiosResponse) => {
-            if (res.status === 200) {
-                dispatch({
-                    type: SettingActionTypes.FETCH_ALL_CATEGORIES,
-                    payload: res.data.categories
-                })
-            }
-        })
-    }
-
     React.useEffect(() => {
         dispatch({
             type: SettingActionTypes.SET_IS_LOADING_CATEGORIES,
             payload: true
         });
-        loadCategoriesList();
+        loadCategoriesList(dispatch);
     }, []);
 
     const handleEditCategory: (category: TCategory) => void = (category) => {
@@ -105,7 +94,7 @@ const CategoriesList = (props: Props) => {
                 payload: true
             });
             deleteCategory(category).then(() => {
-                loadCategoriesList();
+                loadCategoriesList(dispatch);
                 setOpenConfirmDialog(false);
                 setConfirmDialogTitle('');
                 setConfirmDialogMessage('');
@@ -127,19 +116,12 @@ const CategoriesList = (props: Props) => {
     const handleConfirmDialogCancel: () => void = () => {
         console.log({ handleConfirmDialogCancel: selectedCategory });
         setOpenConfirmDialog(false);
-
-        console.log({ selectedCategory });
-    }
-    const handleEditFormSubmit: () => void = () => {
-        console.log({ handleConfirmDialogSubmit: selectedCategory });
-        console.log({ selectedCategory });
-        setOpenConfirmDialog(false);
     }
 
     return (
         <>
             {isLoadingCategories ? <LoadingIndicator width="100%" height="400px" /> : (<List className={classes.root}>
-                {categories.length ? categories.map((category: TCategory) => (
+                {categories.length > 0 ? categories.map((category: TCategory) => (
                     <ListItem key={category.id}>
                         <ListItemText primary={category.arName} secondary={category.enName} />
                         <ListItemSecondaryAction>
@@ -177,7 +159,7 @@ const CategoriesList = (props: Props) => {
             <CategoryDetailsForm
                 open={openForm}
                 handleClose={() => { setOpenForm(false) }}
-                mode={formMode}/>
+                mode={formMode} />
 
         </>
     )

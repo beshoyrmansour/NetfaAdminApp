@@ -45,15 +45,19 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 import { BranchesActionTypes, TBranch } from '../../models/Branches';
 import { deleteBranch, loadBranchesList } from '../../redux/actions/branchActions';
 import BranchesDetailsForm from './BranchesDetailsForm';
-const useStyles = makeStyles({
+
+const useStyles = makeStyles((theme: Theme) => createStyles({
+
     table: {
         minWidth: 650,
+        marginBottom: theme.spacing(3)
     },
     noItemsText: {
         width: "100%",
         height: "400px",
-    }
-});
+    },
+}),
+);
 
 
 
@@ -149,8 +153,8 @@ const BranchesList = (props: Props) => {
     return (
         <>
             {isLoadingBranches ? (<LoadingIndicator width="100%" height="400px" />)
-                : (branches.length > 0 ? <TableContainer>:
-                        <Table className={classes.table} aria-label="simple table">
+                : (branches.length > 0 ? <TableContainer>
+                    <Table className={classes.table} aria-label="simple table">
                         <TableHead>
                             <TableRow>
                                 <TableCell>الإسم</TableCell>

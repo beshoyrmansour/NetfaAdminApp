@@ -29,6 +29,18 @@ import ConfirmDialog from './ConfirmDialog';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
+import Checkbox from '@material-ui/core/Checkbox';
+import CommentIcon from '@material-ui/icons/Comment';
+import SingleOrderItemsProducts from '../pages/products/SingleOrderItemsProducts';
+import LoadingIndicator from './LoadingIndicator';
+import Avatar from '@material-ui/core/Avatar';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ImageIcon from '@material-ui/icons/Image';
 
 interface Props {
     toggleOpenBundleForm: () => void;
@@ -93,13 +105,18 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingRight_1: { paddingRight: theme.spacing(1) },
     marginRight_2: { marginRight: theme.spacing(2) },
     saveButton: { marginBottom: theme.spacing(1) },
+    productList: {
+
+    }
 }));
 
 const BundleForm = (props: Props) => {
     const classes = useStyles();
     const dispatch = useDispatch();
     const { toggleOpenBundleForm, mode } = props
-    const selectedProduct = useSelector((state: AppState) => state.products.selectedProduct);
+    const selectedProduct = useSelector((state: AppState) => state.bundles.selectedProduct);
+    const singleOrderItemsProducts = useSelector((state: AppState) => state.products.products);
+    const isLoadingSingleOrderItemsProducts = useSelector((state: AppState) => state.products.isLoadingProducts);
 
     // const [mainImageId, setMainImageId] = React.useState(0);
     const [enName, setEnName] = React.useState<string>("");
@@ -120,6 +137,7 @@ const BundleForm = (props: Props) => {
     const [mainImageErrorText, setMainImageErrorText] = React.useState<string>('');
     const [categoriesList, setCategoriesList] = React.useState([]);
     const [quantitiesList, setQuantitiesList] = React.useState([]);
+    const [selectedProductsList, setSelectedProductsList] = React.useState<number[]>([]);
 
 
     const [confirmDialogMessage, setConfirmDialogMessage] = React.useState<string>('');
@@ -367,7 +385,18 @@ const BundleForm = (props: Props) => {
 
     }, [])
 
+    const handleSelectedProductToggle = (value: number) => () => {
+        const currentIndex = selectedProductsList.indexOf(value);
+        const newChecked = [...selectedProductsList];
 
+        if (currentIndex === -1) {
+            newChecked.push(value);
+        } else {
+            newChecked.splice(currentIndex, 1);
+        }
+
+        setSelectedProductsList(newChecked);
+    };
     return (
 
         <Container maxWidth="lg" className={classes.formContainer}>
@@ -613,6 +642,29 @@ const BundleForm = (props: Props) => {
                             title="Main Product Image"
                         />}
 
+                    </Grid>
+                    <Grid item xs={12} container direction="column" className={classes.productList}>
+                        {isLoadingSingleOrderItemsProducts ? (<LoadingIndicator width="100%" height="400px" />) : (<List >
+                            {singleOrderItemsProducts.map((product: TProduct) => (<ListItem key={product.id} role={undefined} dense button onClick={handleSelectedProductToggle(product.id as number)}>
+                                <ListItemIcon>
+                                    <Checkbox
+                                        edge="start"
+                                        checked={selectedProductsList.indexOf(product.id as number) !== -1}
+                                        tabIndex={-1}
+                                        disableRipple
+                                        inputProps={{ 'aria-labelledby': product.arName }}
+                                    />
+                                </ListItemIcon>
+                                <ListItemAvatar>
+                                    {product.thumbnailBase64 ? <Avatar alt="Cindy Baker" src={`data:image/png;base64,${product.thumbnailBase64}`} /> : <ImageIcon />}
+                                </ListItemAvatar>
+                                <ListItemText id={(product.id as number).toString()} primary={product.arName} />
+                                <ListItemSecondaryAction>
+                                    <Typography>{product.unitPrice} ريال</Typography>
+                                </ListItemSecondaryAction>
+                            </ListItem>))}
+
+                        </List>)}
                     </Grid>
                 </Grid>
             </form>

@@ -129,6 +129,7 @@ const Settings = (props: Props) => {
                     <QuantityDetailsForm
                         open={openAddQuantity}
                         handleClose={() => setOpenAddQuantity(false)}
+                        mode={UI_FROM_MODE.NEW}
                     />
                 </Paper>
             </Grid>
