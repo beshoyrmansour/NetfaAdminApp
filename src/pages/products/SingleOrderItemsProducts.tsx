@@ -531,8 +531,8 @@ export default function SingleOrderItemsProducts() {
                                                     <TableCell align="center">
                                                         {selected.length <= 0 &&
                                                             <Box display="flex">
-                                                                <Tooltip title="إخفاء">
-                                                                    <IconButton aria-label="إخفاء" onClick={() => handleToggleProduct(row)}>
+                                                                <Tooltip title={row.isAvailableForPurchase ? "إخفاء" : "إظهار"}>
+                                                                    <IconButton aria-label={row.isAvailableForPurchase ? "إخفاء" : "إظهار"} onClick={() => handleToggleProduct(row)}>
                                                                         {row.isAvailableForPurchase ? <VisibilityOffIcon color="primary" /> : <VisibilityIcon color="primary" />}
                                                                     </IconButton>
                                                                 </Tooltip>
