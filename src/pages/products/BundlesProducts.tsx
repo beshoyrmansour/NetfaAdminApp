@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
 import Paper from '@material-ui/core/Paper';
-import Switch from '@material-ui/core/Switch';
 import Button from '@material-ui/core/Button';
 import Drawer from '@material-ui/core/Drawer';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -18,14 +17,12 @@ import Typography from '@material-ui/core/Typography';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import TablePagination from '@material-ui/core/TablePagination';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Avatar from '@material-ui/core/Avatar';
 import ImageIcon from '@material-ui/icons/Image';
 import CardMedia from '@material-ui/core/CardMedia';
 
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
 
-import SubdirectoryArrowLeftIcon from '@material-ui/icons/SubdirectoryArrowLeft';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityIcon from '@material-ui/icons/Visibility';
@@ -34,10 +31,9 @@ import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 // import FilterListIcon from '@material-ui/icons/FilterList';
 
-import { TProduct } from '../../models/Products';
-import { BundlesActionTypes } from '../../models/Bundles';
+import { BundlesActionTypes, TBundle } from '../../models/Bundles';
 import BundleForm from '../../components/BundleForm';
-import { TOGGLE_MODES, UI_FROM_MODE } from '../../models/configs';
+import { UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleProducts, deleteProductsBulk, loadBundleProducts } from '../../redux/actions/bundlesActions';
@@ -86,7 +82,7 @@ type Order = 'asc' | 'desc';
 
 interface HeadCell {
     disablePadding: boolean;
-    id: keyof TProduct;
+    id: keyof TBundle;
     label: string;
     numeric: boolean;
 }
@@ -95,13 +91,13 @@ const headCells: HeadCell[] = [
     { id: 'arName', numeric: false, disablePadding: true, label: 'الإسم' },
     { id: 'thumbnailBase64', numeric: false, disablePadding: false, label: 'صورة المنتج' },
     { id: 'unitPrice', numeric: true, disablePadding: false, label: 'سعر الوحدة' },
-    { id: 'quantityValue', numeric: true, disablePadding: false, label: 'الكمية الافتراضية' },
+    { id: 'content', numeric: true, disablePadding: false, label: 'عدد اامحتويات' },
 ];
 
 interface EnhancedTableProps {
     classes: ReturnType<typeof useStyles>;
     numSelected: number;
-    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof TProduct) => void;
+    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof TBundle) => void;
     onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
     order: Order;
     orderBy: string;
@@ -111,7 +107,7 @@ interface EnhancedTableProps {
 
 function EnhancedTableHead(props: EnhancedTableProps) {
     const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-    const createSortHandler = (property: keyof TProduct) => (event: React.MouseEvent<unknown>) => {
+    const createSortHandler = (property: keyof TBundle) => (event: React.MouseEvent<unknown>) => {
         onRequestSort(event, property);
     };
 
@@ -191,7 +187,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     const { selectedIds } = props;
     const [openAddNewProduct, setOpenAddNewProduct] = useState(false);
     const [showVisableToggle, setShowVisableToggle] = useState(false);
-    const [selectredProduct, setSelectredProduct] = useState<TProduct[]>([]);
+    const [selectredProduct, setSelectredProduct] = useState<TBundle[]>([]);
 
 
     const [confirmDialogMessage, setConfirmDialogMessage] = React.useState<string>('');
@@ -212,9 +208,9 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     }, [isLoadingProducts])
 
     React.useEffect(() => {
-        const newSelectredProduct = selectedIds.map((pid: string) => products.find((p: TProduct) => p.id?.toString() === pid));
+        const newSelectredProduct = selectedIds.map((pid: string) => products.find((p: TBundle) => p.id?.toString() === pid));
         setSelectredProduct(newSelectredProduct);
-        const enabledProductsList = newSelectredProduct.filter((p: TProduct) => p.isAvailableForPurchase);
+        const enabledProductsList = newSelectredProduct.filter((p: TBundle) => p.isAvailableForPurchase);
         setShowVisableToggle(enabledProductsList.length === newSelectredProduct.length)
     }, [selectedIds])
 
@@ -340,7 +336,7 @@ export default function BundlesProducts() {
     const dispatch = useDispatch();
 
     const [order, setOrder] = React.useState<Order>('asc');
-    const [orderBy, setOrderBy] = React.useState<keyof TProduct>('arName');
+    const [orderBy, setOrderBy] = React.useState<keyof TBundle>('arName');
     const [selected, setSelected] = React.useState<string[]>([]);
 
     const [page, setPage] = React.useState(0);
@@ -362,7 +358,7 @@ export default function BundlesProducts() {
         setOpenProductDetails((prevOpenProductDetails) => !prevOpenProductDetails)
     }
 
-    const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof TProduct) => {
+    const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof TBundle) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
@@ -370,14 +366,14 @@ export default function BundlesProducts() {
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            const newSelected = products.map((n: TProduct) => (n.id as number).toString());
+            const newSelected = products.map((n: TBundle) => (n.id as number).toString());
             setSelected(newSelected);
             return;
         }
         setSelected([]);
     };
 
-    const handleClick = (event: React.MouseEvent<unknown>, row: TProduct) => {
+    const handleClick = (event: React.MouseEvent<unknown>, row: TBundle) => {
         const rowId = row.id as number;
         const selectedIndex = selected.indexOf(rowId.toString());
         let newSelected: string[] = [];
@@ -404,7 +400,7 @@ export default function BundlesProducts() {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-    const handleOpenBundleFormOnClick = (product: TProduct, mode: UI_FROM_MODE) => {
+    const handleOpenBundleFormOnClick = (product: TBundle, mode: UI_FROM_MODE) => {
         dispatch({
             type: BundlesActionTypes.SET_SELECTED_PRODUCT,
             payload: product
@@ -413,7 +409,7 @@ export default function BundlesProducts() {
         toggleOpenProductDetails()
     };
 
-    const isSelected = (row: TProduct) => selected.indexOf((row.id as number).toString()) !== -1;
+    const isSelected = (row: TBundle) => selected.indexOf((row.id as number).toString()) !== -1;
 
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, products.length - page * rowsPerPage);
@@ -432,7 +428,7 @@ export default function BundlesProducts() {
     }, [])
 
 
-    const handleToggleProduct: (product: TProduct) => void = (product) => {
+    const handleToggleProduct: (product: TBundle) => void = (product) => {
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد ${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'} المنتج "${product.arName}"  ${product.isAvailableForPurchase ? 'من' : 'في'} قائمة المنتجات علي التطبيق`);
         setConfirmDialogSubmit(`${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'}`);
@@ -483,7 +479,7 @@ export default function BundlesProducts() {
                                         <TableBody>
                                             {/* {stableSort(products, getComparator(order, orderBy))
                                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
-                                            {products.map((row: TProduct, index: number) => {
+                                            {products.map((row: TBundle, index: number) => {
                                                 const isItemSelected = isSelected(row);
                                                 const labelId = `enhanced-table-checkbox-${index}`;
                                                 return (
@@ -514,16 +510,8 @@ export default function BundlesProducts() {
                                                                 title="Main Product Image"
                                                             /> : <ImageIcon />}
                                                         </Avatar></TableCell>
-                                                        <TableCell align="left"><Avatar variant="square">
-                                                            {row.thumbnailBase64 ? <CardMedia
-                                                                // className={classes.cover}
-                                                                component="img"
-                                                                image={`data:image/png;base64,${row.thumbnailBase64}`}
-                                                                title="Main Product Image"
-                                                            /> : <ImageIcon />}
-                                                        </Avatar></TableCell>
                                                         <TableCell align="left">{row.unitPrice}</TableCell>
-                                                        <TableCell align="left">{row.quantityValue}</TableCell>
+                                                        <TableCell align="left">{row.content?.length}</TableCell>
                                                         <TableCell align="center">
                                                             {selected.length <= 0 &&
                                                                 <Box display="flex">

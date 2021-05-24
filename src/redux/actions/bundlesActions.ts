@@ -1,5 +1,5 @@
 import axios from "../../api/axios";
-import { TProduct, IGetSingleOrderItemsProductsReq, IToggleProductsReq, IDeleteProductsBulkReq, IDeleteProductReq } from "../../models/Products";
+import { IGetSingleOrderItemsProductsReq, IToggleProductsReq, IDeleteProductsBulkReq, IDeleteProductReq } from "../../models/Products";
 import { BundlesActionTypes, TBundle } from "../../models/Bundles";
 import END_POINTS from '../../api/endPoints';
 import { TOGGLE_MODES, UI_FROM_MODE } from "../../models/configs";
@@ -45,7 +45,7 @@ export const loadBundleProducts: (dispatch: any) => void = (dispatch) => {
         if (res.status === 200) {
             dispatch({
                 type: BundlesActionTypes.FETCH_ALL_PRODUCTS,
-                payload: res.data.singleOrderItems
+                payload: res.data.bundles
             })
         }
     });

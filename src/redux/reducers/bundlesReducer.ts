@@ -1,4 +1,4 @@
-import { TProduct, ProductsActionType, ProductsReducerType } from "../../models/Products";
+import { ProductsActionType, ProductsReducerType } from "../../models/Products";
 import { BundlesActionTypes } from "../../models/Bundles";
 
 export const productsInitReducerState: ProductsReducerType = {
@@ -11,7 +11,7 @@ export const productsInitReducerState: ProductsReducerType = {
 
 export const bundlesReducer = (state: ProductsReducerType = productsInitReducerState, action: ProductsActionType) => {
     switch (action.type as any) {
-        case BundlesActionTypes.FETCH_ALL_PRODUCTS:
+        case BundlesActionTypes.SET_IS_LOADING_PRODUCTS:
             return {
                 ...state,
                 isLoadingProducts: action.payload

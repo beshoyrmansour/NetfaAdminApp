@@ -17,14 +17,13 @@ import Select from '@material-ui/core/Select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import { ProductsActionTypes, TProduct } from '../models/Products';
-import { TOGGLE_MODES, UI_FROM_MODE } from '../models/configs';
+import { UI_FROM_MODE } from '../models/configs';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../redux/store';
 import { createOrUpdateBundleProduct, deleteProduct, loadBundleProducts, toggleProducts } from '../redux/actions/bundlesActions';
 import { TCategory } from '../models/Categories';
 import { getCategoriesList } from '../redux/actions/categoriesActions';
 import { getQuantitiesList } from '../redux/actions/settingActions';
-import { TQuantity } from '../models/Quantity';
 import ConfirmDialog from './ConfirmDialog';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityIcon from '@material-ui/icons/Visibility';
@@ -35,13 +34,12 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
-import CommentIcon from '@material-ui/icons/Comment';
-import SingleOrderItemsProducts from '../pages/products/SingleOrderItemsProducts';
 import LoadingIndicator from './LoadingIndicator';
 import Avatar from '@material-ui/core/Avatar';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ImageIcon from '@material-ui/icons/Image';
 import { loadSingleOrderItemsProducts } from '../redux/actions/productsActions';
+import { TBundle } from '../models/Bundles';
 
 interface Props {
     toggleOpenBundleForm: () => void;
@@ -126,7 +124,6 @@ const BundleForm = (props: Props) => {
     const [thumbnailBase64, setThumbnailBase64] = React.useState<string>("");
     const [unitPrice, setUnitPrice] = React.useState<number | null>(null);
     const [categoryId, setCategoryId] = React.useState<number | null>(null);
-    const [defaultQuantityId, setDefaultQuantityId] = React.useState<number | null>(null);
     const [enDescription, setEnDescription] = React.useState<string>("");
     const [arDescription, setArDescription] = React.useState<string>("");
     const [isAvailableForPurchase, setIsAvailableForPurchase] = React.useState<boolean>(true);
@@ -138,7 +135,6 @@ const BundleForm = (props: Props) => {
     const [thumbnailErrorText, setThumbnailErrorText] = React.useState<string>('');
     const [mainImageErrorText, setMainImageErrorText] = React.useState<string>('');
     const [categoriesList, setCategoriesList] = React.useState([]);
-    const [quantitiesList, setQuantitiesList] = React.useState([]);
     const [selectedProductsList, setSelectedProductsList] = React.useState<number[]>([]);
 
 
@@ -213,7 +209,7 @@ const BundleForm = (props: Props) => {
         };
     };
 
-    const handleDeleteProduct: (product: TProduct) => void = (product) => {
+    const handleDeleteProduct: (product: TBundle) => void = (product) => {
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد حذف المنتج من قائمة المنتجات`);
         setConfirmDialogSubmit("حذف");
@@ -234,7 +230,7 @@ const BundleForm = (props: Props) => {
         setOnSubmit((prev) => _deleteProduct)
     }
 
-    const handleToggleProduct: (product: TProduct) => void = (product) => {
+    const handleToggleProduct: (product: TBundle) => void = (product) => {
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد ${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'} المنتج "${product.arName}"  ${product.isAvailableForPurchase ? 'من' : 'في'} قائمة المنتجات علي التطبيق`);
         setConfirmDialogSubmit(`${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'}`);
@@ -267,7 +263,6 @@ const BundleForm = (props: Props) => {
             arName !== '' &&
             unitPrice !== null &&
             categoryId !== null &&
-            defaultQuantityId !== null &&
             enDescription !== '' &&
             arDescription !== '' &&
             thumbnailLink !== '' &&
@@ -280,7 +275,6 @@ const BundleForm = (props: Props) => {
         thumbnailBase64,
         unitPrice,
         categoryId,
-        defaultQuantityId,
         enDescription,
         arDescription,
         thumbnailLink,
@@ -297,7 +291,6 @@ const BundleForm = (props: Props) => {
                 setThumbnailBase64(selectedProduct?.thumbnailBase64 || '');
                 setUnitPrice(selectedProduct?.unitPrice || 0);
                 setCategoryId(selectedProduct?.categoryId || null);
-                setDefaultQuantityId(selectedProduct?.defaultQuantityId || null);
                 setEnDescription(selectedProduct?.enDescription || '');
                 setArDescription(selectedProduct?.arDescription || '');
                 setIsAvailableForPurchase(selectedProduct?.isAvailableForPurchase || true);
@@ -305,7 +298,23 @@ const BundleForm = (props: Props) => {
                 setMainImageLink(selectedProduct?.mainImageLink || '');
                 setThumbnailFile(selectedProduct?.thumbnailBase64 || selectedProduct?.thumbnailBase64);
                 setMainImageFile(selectedProduct?.mainImageFile || '');
+                setSelectedProductsList(selectedProduct.content.length ? selectedProduct?.content?.map((b: TBundle) => b.id) : [])
 
+                break;
+            case UI_FROM_MODE.NEW:
+                setEnName('');
+                setArName('');
+                setThumbnailBase64('');
+                setUnitPrice(0);
+                setCategoryId(null);
+                setEnDescription('');
+                setArDescription('');
+                setIsAvailableForPurchase(true);
+                setThumbnailLink('');
+                setMainImageLink('');
+                setThumbnailFile(selectedProduct?.thumbnailBase64);
+                setMainImageFile('');
+                setSelectedProductsList([]);
                 break;
             default:
                 break;
@@ -339,7 +348,7 @@ const BundleForm = (props: Props) => {
 
                 if (res.status === 201) {
                     loadBundleProducts(dispatch);
-                    // toggleOpenBundleForm();
+                    toggleOpenBundleForm();
                 }
                 else {
                     alert('ERROR');
@@ -371,17 +380,9 @@ const BundleForm = (props: Props) => {
             }
         })
 
-        getQuantitiesList().then((res: any) => {
-            if (res?.status === 200) {
-                setQuantitiesList(res?.data)
-            } else {
-
-            }
-        })
         if (singleOrderItemsProducts.length <= 0) {
             loadSingleOrderItemsProducts(dispatch);
         }
-
     }, [])
 
     const handleSelectedProductToggle = (product: TProduct) => () => {
@@ -400,6 +401,74 @@ const BundleForm = (props: Props) => {
         }
         setSelectedProductsList(newChecked);
     };
+
+    const renderSingleProductList = () => {
+        switch (mode) {
+            case UI_FROM_MODE.VIEW:
+                return selectedProduct.content?.length <= 0 ? <Typography gutterBottom>لا يوجد منتجات</Typography> : (<List>
+                    {selectedProduct.content?.map((product: TProduct) => (<ListItem key={product.id} role={undefined} dense button onClick={handleSelectedProductToggle(product)}>
+                        <ListItemAvatar>
+                            {product.thumbnailBase64 ? <Avatar alt="Cindy Baker" src={`data:image/png;base64,${product.thumbnailBase64}`} /> : <ImageIcon />}
+                        </ListItemAvatar>
+                        <ListItemText id={(product.id as number).toString()} primary={product.arName} />
+                        <ListItemSecondaryAction>
+                            <Typography>{product.unitPrice} ريال</Typography>
+                        </ListItemSecondaryAction>
+                    </ListItem>))}
+                </List>);
+
+            // case UI_FROM_MODE.EDIT:
+            //     return selectedProduct.content?.length <= 0 ? <Typography gutterBottom>لا يوجد منتجات</Typography> : (<List>
+            //         {selectedProduct.content?.map((product: TProduct) => (<ListItem key={product.id} role={undefined} dense button onClick={handleSelectedProductToggle(product)}>
+            //             <ListItemIcon>
+            //                 <Checkbox
+            //                     edge="start"
+            //                     checked={selectedProductsList.indexOf(product.id as number) !== -1}
+            //                     tabIndex={-1}
+            //                     disableRipple
+            //                     inputProps={{
+            //                         'aria-labelledby': product.arName,
+            //                     }}
+            //                 />
+            //             </ListItemIcon>
+            //             <ListItemAvatar>
+            //                 {product.thumbnailBase64 ? <Avatar alt="Cindy Baker" src={`data:image/png;base64,${product.thumbnailBase64}`} /> : <ImageIcon />}
+            //             </ListItemAvatar>
+            //             <ListItemText id={(product.id as number).toString()} primary={product.arName} />
+            //             <ListItemSecondaryAction>
+            //                 <Typography>{product.unitPrice} ريال</Typography>
+            //             </ListItemSecondaryAction>
+            //         </ListItem>))}
+            //     </List>);
+            case UI_FROM_MODE.EDIT:
+            case UI_FROM_MODE.NEW:
+                return isLoadingSingleOrderItemsProducts ? (<LoadingIndicator width="100%" height="300px" />) : (<List>
+                    {singleOrderItemsProducts.map((product: TProduct) => (<ListItem key={product.id} role={undefined} dense button onClick={handleSelectedProductToggle(product)}>
+                        <ListItemIcon>
+                            <Checkbox
+                                edge="start"
+                                checked={selectedProductsList.indexOf(product.id as number) !== -1}
+                                tabIndex={-1}
+                                disableRipple
+                                inputProps={{
+                                    'aria-labelledby': product.arName,
+                                }}
+                            />
+                        </ListItemIcon>
+                        <ListItemAvatar>
+                            {product.thumbnailBase64 ? <Avatar alt="Cindy Baker" src={`data:image/png;base64,${product.thumbnailBase64}`} /> : <ImageIcon />}
+                        </ListItemAvatar>
+                        <ListItemText id={(product.id as number).toString()} primary={product.arName} />
+                        <ListItemSecondaryAction>
+                            <Typography>{product.unitPrice} ريال</Typography>
+                        </ListItemSecondaryAction>
+                    </ListItem>))}
+                </List>)
+
+            default:
+                break;
+        }
+    }
     return (
 
         <Container maxWidth="lg" className={classes.formContainer}>
@@ -562,29 +631,6 @@ const BundleForm = (props: Props) => {
                         />
 
                     </Grid>
-                    {/* <Grid item xs={6} >
-                        <FormControl
-                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
-                            disabled={mode === UI_FROM_MODE.VIEW}
-                            fullWidth>
-                            <InputLabel id="demo-simple-select-outlined-label">الكمية الافتراضية</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                value={defaultQuantityId}
-                                onChange={handleDefaultQuantityIdChange}
-                                label="categoryId"
-                            >
-                                <MenuItem value="">
-                                    <em>None</em>
-                                </MenuItem>
-                                {quantitiesList.map((quantity: TQuantity) => (
-                                    <MenuItem value={quantity.id}>{quantity?.arName}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl> */}
-                    {/* </Grid> */}
-
                 </Grid>
 
                 <Grid direction="row" container>
@@ -649,28 +695,7 @@ const BundleForm = (props: Props) => {
                     </Grid>
                     <Grid item xs={12} container direction="column" className={classes.productList}>
                         <Typography variant="h5" gutterBottom>قائمة المنتجات</Typography>
-
-                        {isLoadingSingleOrderItemsProducts ? (<LoadingIndicator width="100%" height="300px" />) : (<List>
-                            {singleOrderItemsProducts.map((product: TProduct) => (<ListItem key={product.id} role={undefined} dense button onClick={handleSelectedProductToggle(product)}>
-                                <ListItemIcon>
-                                    <Checkbox
-                                        edge="start"
-                                        checked={selectedProductsList.indexOf(product.id as number) !== -1}
-                                        tabIndex={-1}
-                                        disableRipple
-                                        inputProps={{ 'aria-labelledby': product.arName }}
-                                    />
-                                </ListItemIcon>
-                                <ListItemAvatar>
-                                    {product.thumbnailBase64 ? <Avatar alt="Cindy Baker" src={`data:image/png;base64,${product.thumbnailBase64}`} /> : <ImageIcon />}
-                                </ListItemAvatar>
-                                <ListItemText id={(product.id as number).toString()} primary={product.arName} />
-                                <ListItemSecondaryAction>
-                                    <Typography>{product.unitPrice} ريال</Typography>
-                                </ListItemSecondaryAction>
-                            </ListItem>))}
-
-                        </List>)}
+                        {renderSingleProductList()}
                     </Grid>
                 </Grid>
             </form>
