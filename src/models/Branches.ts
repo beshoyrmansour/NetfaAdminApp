@@ -2,7 +2,7 @@ import { AxiosResponse } from "axios"
 
 export type TAddress = {
     id?: number;
-    addedDate: string;
+    addedDate?: string;
     modifiedDate?: string;
     addressTitle?: string;
     buildingNumber: string;

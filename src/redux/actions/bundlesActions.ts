@@ -1,14 +1,14 @@
 import axios from "../../api/axios";
 import { TProduct, IGetSingleOrderItemsProductsReq, IToggleProductsReq, IDeleteProductsBulkReq, IDeleteProductReq } from "../../models/Products";
-import { BundlesActionTypes } from "../../models/Bundles";
+import { BundlesActionTypes, TBundle } from "../../models/Bundles";
 import END_POINTS from '../../api/endPoints';
 import { TOGGLE_MODES, UI_FROM_MODE } from "../../models/configs";
 
-export const getSingleOrderItemsProducts: IGetSingleOrderItemsProductsReq = (AvailableForPurchaseOnly, PageNumber, PageSize, OrderBy) => {
+export const getBundleProducts: IGetSingleOrderItemsProductsReq = (AvailableForPurchaseOnly, PageNumber, PageSize, OrderBy) => {
     return axios.get(END_POINTS.BUNDLES)
 }
 
-export const createOrUpdateSingleItemProduct = (mainImageFile: any, newProduct: TProduct, mode: UI_FROM_MODE) => {
+export const createOrUpdateBundleProduct = (mainImageFile: any, newProduct: TBundle, mode: UI_FROM_MODE) => {
     console.log({ newProduct, mainImageFile });
     return axios({
         method: mode !== UI_FROM_MODE.NEW ? 'put' : 'post',
@@ -41,8 +41,8 @@ export const deleteProduct: IDeleteProductReq = (porductId) => {
     return axios.delete(`${END_POINTS.BUNDLES}/${porductId}`)
 }
 
-export const loadSingleOrderItemsProducts: (dispatch: any) => void = (dispatch) => {
-    getSingleOrderItemsProducts().then((res) => {
+export const loadBundleProducts: (dispatch: any) => void = (dispatch) => {
+    getBundleProducts().then((res) => {
         console.log({
             payloadRes: res
         });

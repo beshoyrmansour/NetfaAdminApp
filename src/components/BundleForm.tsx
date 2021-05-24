@@ -20,7 +20,7 @@ import { ProductsActionTypes, TProduct } from '../models/Products';
 import { TOGGLE_MODES, UI_FROM_MODE } from '../models/configs';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../redux/store';
-import { createOrUpdateSingleItemProduct, deleteProduct, loadSingleOrderItemsProducts, toggleProducts } from '../redux/actions/productsActions';
+import { createOrUpdateBundleProduct, deleteProduct, loadBundleProducts, toggleProducts } from '../redux/actions/bundlesActions';
 import { TCategory } from '../models/Categories';
 import { getCategoriesList } from '../redux/actions/categoriesActions';
 import { getQuantitiesList } from '../redux/actions/settingActions';
@@ -41,6 +41,7 @@ import LoadingIndicator from './LoadingIndicator';
 import Avatar from '@material-ui/core/Avatar';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ImageIcon from '@material-ui/icons/Image';
+import { loadSingleOrderItemsProducts } from '../redux/actions/productsActions';
 
 interface Props {
     toggleOpenBundleForm: () => void;
@@ -106,7 +107,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginRight_2: { marginRight: theme.spacing(2) },
     saveButton: { marginBottom: theme.spacing(1) },
     productList: {
-
+        maxHeight: "400px",
+        overflowY: "auto",
     }
 }));
 
@@ -149,33 +151,38 @@ const BundleForm = (props: Props) => {
     const handleEnNameChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setEnName(event.target.value as string)
     }
+
     const handleArNameChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setArName(event.target.value as string)
     }
+
     const handleUnitPriceChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         const rx_live = /^[+-]?\d*(?:[.]\d*)?$/;
         if (rx_live.test(event.target.value as string))
             setUnitPrice(event.target.value as number || 0)
     }
+
     const handleCategoryIdChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setCategoryId(event.target.value as number)
     }
-    const handleDefaultQuantityIdChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setDefaultQuantityId(event.target.value as number)
-    }
+
     const handleEnDescriptionChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setEnDescription(event.target.value as string)
     }
+
     const handleArDescriptionChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setArDescription(event.target.value as string)
     }
+
     const handleIsAvailableForPurchaseChange = (event: React.ChangeEvent<{ checked: boolean }>) => {
         if (mode !== UI_FROM_MODE.VIEW) setIsAvailableForPurchase(event.target.checked)
     }
+
     const _handleReaderLoaded = (readerEvt: any) => {
         let binaryString = readerEvt.target.result;
         setThumbnailBase64(btoa(binaryString))
     }
+
     const handleThumbnailLinkChange = (event: any) => {
         let reader = new FileReader();
         if (event.target.files.length && event.target.files[0].size < 5242880) {
@@ -196,6 +203,7 @@ const BundleForm = (props: Props) => {
 
         };
     };
+
     const handleMainImageLinkChange = (event: any) => {
         if (event.target.files.length && event.target.files[0].size < 5242880) {
             const imageFileURL = URL.createObjectURL(event.target.files[0]);
@@ -221,7 +229,7 @@ const BundleForm = (props: Props) => {
                 payload: true
             });
             deleteProduct(product.id as number).then(() => {
-                loadSingleOrderItemsProducts(dispatch);
+                loadBundleProducts(dispatch);
                 setOpenConfirmDialog(false);
                 setConfirmDialogTitle('');
                 setConfirmDialogMessage('');
@@ -244,7 +252,7 @@ const BundleForm = (props: Props) => {
                 payload: true
             });
             toggleProducts([product.id as number], product.isAvailableForPurchase).then(() => {
-                loadSingleOrderItemsProducts(dispatch);
+                loadBundleProducts(dispatch);
                 setOpenConfirmDialog(false);
                 setConfirmDialogTitle('');
                 setConfirmDialogMessage('');
@@ -253,6 +261,7 @@ const BundleForm = (props: Props) => {
         }
         setOnSubmit((prev) => _toggleProduct)
     }
+
     const handleConfirmDialogCancel: () => void = () => {
         setOpenConfirmDialog(false);
     }
@@ -269,7 +278,8 @@ const BundleForm = (props: Props) => {
             enDescription !== '' &&
             arDescription !== '' &&
             thumbnailLink !== '' &&
-            mainImageLink !== ''
+            mainImageLink !== '' &&
+            selectedProductsList.length > 1
         )
     }, [
         enName,
@@ -282,6 +292,7 @@ const BundleForm = (props: Props) => {
         arDescription,
         thumbnailLink,
         mainImageLink,
+        selectedProductsList,
     ])
 
     React.useEffect(() => {
@@ -308,7 +319,7 @@ const BundleForm = (props: Props) => {
             default:
                 break;
         }
-    }, [mode])
+    }, [mode]);
 
     const handleSingleItemProductSubmit = () => {
         console.log("handleSubmitEditProduct");
@@ -319,25 +330,25 @@ const BundleForm = (props: Props) => {
         setIsFormValid(false);
 
 
-        createOrUpdateSingleItemProduct(
+        createOrUpdateBundleProduct(
             mainImageFile,
             {
-                enName,
-                arName,
-                thumbnailBase64,
-                unitPrice,
-                categoryId,
-                defaultQuantityId,
-                enDescription,
-                arDescription,
-                isAvailableForPurchase,
-                id: selectedProduct.id
+                id: selectedProduct?.id,
+                enName: enName,
+                arName: arName,
+                thumbnailBase64: thumbnailBase64,
+                unitPrice: unitPrice as number,
+                isAvailableForPurchase: isAvailableForPurchase,
+                categoryId: categoryId as number,
+                enDescription: enDescription,
+                arDescription: arDescription,
+                contentIds: selectedProductsList,
 
             },
             mode).then((res: any) => {
 
                 if (res.status === 201) {
-                    loadSingleOrderItemsProducts(dispatch);
+                    loadBundleProducts(dispatch);
                     // toggleOpenBundleForm();
                 }
                 else {
@@ -352,12 +363,10 @@ const BundleForm = (props: Props) => {
             });
     }
 
-
-
     const getFormName = () => {
         switch (mode) {
             case UI_FROM_MODE.NEW:
-                return 'إضافة منتج جديد'
+                return 'إضافة مجموعة جديدة'
             default:
                 return 'arName' in selectedProduct ? selectedProduct.arName : ''
         }
@@ -381,20 +390,26 @@ const BundleForm = (props: Props) => {
 
             }
         })
-
+        if (singleOrderItemsProducts.length <= 0) {
+            loadSingleOrderItemsProducts(dispatch);
+        }
 
     }, [])
 
-    const handleSelectedProductToggle = (value: number) => () => {
-        const currentIndex = selectedProductsList.indexOf(value);
+    const handleSelectedProductToggle = (product: TProduct) => () => {
+        const currentIndex = selectedProductsList.indexOf(product.id as number);
         const newChecked = [...selectedProductsList];
 
         if (currentIndex === -1) {
-            newChecked.push(value);
+            newChecked.push(product.id as number);
+            setUnitPrice((prevPrice) => (prevPrice as number) + (product.unitPrice as number));
         } else {
             newChecked.splice(currentIndex, 1);
+            setUnitPrice((prevPrice) => (prevPrice as number) - (product.unitPrice as number));
         }
-
+        if (newChecked.length <= 0) {
+            setUnitPrice(0);
+        }
         setSelectedProductsList(newChecked);
     };
     return (
@@ -483,57 +498,20 @@ const BundleForm = (props: Props) => {
                             rows={4}
                             id="outlined-enDescription"
                             label="الوصف الانجليزي"
-
                             variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
                             InputProps={{
                                 readOnly: mode === UI_FROM_MODE.VIEW,
                             }}
                             value={enDescription}
                             onChange={handleEnDescriptionChange}
-                        /> </Grid> </Grid>
-
-                <Grid direction="row" container
-                    justify="flex-start"
-                    alignItems="center" >
-                    <Grid item xs={6} className={classes.paddingRight_1}>
-                        <TextField
-                            className={classes.textField}
-                            required
-                            multiline
-                            fullWidth
-                            id="outlined-required"
-                            label="السعر الوحدة"
-
-                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
-                            type="number"
-                            value={unitPrice}
-                            onChange={handleUnitPriceChange}
-                            InputProps={{
-                                readOnly: mode === UI_FROM_MODE.VIEW,
-                                endAdornment: <InputAdornment position="start">ريال</InputAdornment>,
-                            }}
-                        />
-
-                    </Grid>
-
-                    <Grid item xs={6}>
-                        <FormControlLabel className={classes.isVisableSwitch}
-                            control={<Switch checked={isAvailableForPurchase} onChange={handleIsAvailableForPurchaseChange} name="isVisableSwitch" inputProps={{
-                                readOnly: mode === UI_FROM_MODE.VIEW,
-                                'aria-label': 'is product visable Switch'
-                            }}
-                            // variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
-                            // disabled={mode === UI_FROM_MODE.VIEW}
-                            />}
-                            label={`إظهار المنتج للعملاء (${isAvailableForPurchase ? 'مرئي' : 'غير مرئي'})`}
                         />
                     </Grid>
-
                 </Grid>
 
                 <Grid direction="row" container
                     justify="flex-start"
-                    alignItems="flex-start">
+                    alignItems="center"
+                    className={classes.textField}>
                     <Grid item xs={6} className={classes.paddingRight_1}>
                         <FormControl
                             variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
@@ -556,9 +534,47 @@ const BundleForm = (props: Props) => {
                                 ))}
                             </Select>
                         </FormControl>
+                    </Grid>
+
+                    <Grid item xs={6}>
+                        <FormControlLabel className={classes.isVisableSwitch}
+                            control={<Switch checked={isAvailableForPurchase} onChange={handleIsAvailableForPurchaseChange} name="isVisableSwitch" inputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
+                                'aria-label': 'is product visable Switch'
+                            }}
+                            // variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
+                            // disabled={mode === UI_FROM_MODE.VIEW}
+                            />}
+                            label={`إظهار المنتج للعملاء (${isAvailableForPurchase ? 'مرئي' : 'غير مرئي'})`}
+                        />
+                    </Grid>
+
+                </Grid>
+
+                <Grid direction="row" container
+                    justify="flex-start"
+                    alignItems="flex-start">
+                    <Grid item xs={6} className={classes.paddingRight_1}>
+                        <TextField
+                            className={classes.textField}
+                            required
+                            multiline
+                            fullWidth
+                            id="outlined-required"
+                            label="السعر الوحدة"
+
+                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
+                            type="number"
+                            value={unitPrice}
+                            onChange={handleUnitPriceChange}
+                            InputProps={{
+                                readOnly: mode === UI_FROM_MODE.VIEW,
+                                endAdornment: <InputAdornment position="start">ريال</InputAdornment>,
+                            }}
+                        />
 
                     </Grid>
-                    <Grid item xs={6} >
+                    {/* <Grid item xs={6} >
                         <FormControl
                             variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
                             disabled={mode === UI_FROM_MODE.VIEW}
@@ -578,8 +594,8 @@ const BundleForm = (props: Props) => {
                                     <MenuItem value={quantity.id}>{quantity?.arName}</MenuItem>
                                 ))}
                             </Select>
-                        </FormControl>
-                    </Grid>
+                        </FormControl> */}
+                    {/* </Grid> */}
 
                 </Grid>
 
@@ -644,8 +660,10 @@ const BundleForm = (props: Props) => {
 
                     </Grid>
                     <Grid item xs={12} container direction="column" className={classes.productList}>
-                        {isLoadingSingleOrderItemsProducts ? (<LoadingIndicator width="100%" height="400px" />) : (<List >
-                            {singleOrderItemsProducts.map((product: TProduct) => (<ListItem key={product.id} role={undefined} dense button onClick={handleSelectedProductToggle(product.id as number)}>
+                        <Typography variant="h5" gutterBottom>قائمة المنتجات</Typography>
+
+                        {isLoadingSingleOrderItemsProducts ? (<LoadingIndicator width="100%" height="300px" />) : (<List>
+                            {singleOrderItemsProducts.map((product: TProduct) => (<ListItem key={product.id} role={undefined} dense button onClick={handleSelectedProductToggle(product)}>
                                 <ListItemIcon>
                                     <Checkbox
                                         edge="start"

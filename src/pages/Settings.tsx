@@ -10,6 +10,11 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
 import QuantitiesList from '../components/settings/QuantitiesList'
 import CategoriesList from '../components/settings/CategoriesList';
 import CategoryDetailsForm from '../components/settings/CategoryDetailsForm';
@@ -58,30 +63,39 @@ const Settings = (props: Props) => {
     return (
         <Grid container spacing={3}>
             <Grid item xs={12} lg={12}>
-                <Paper className={classes.paper}>
-                    <Box display="flex" alignItems="center" justifyContent="space-between" width={"100%"}>
-                        <Typography variant="h4">
-                            الفروع
+                    <Accordion className={classes.paper}>
+                        <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1a-content"
+                            id="panel1a-header"
+                        >
+                            <Box display="flex" alignItems="center" justifyContent="space-between" width={"100%"}>
+                                <Typography variant="h4">
+                                    الفروع
                     </Typography>
-                        <Tooltip title="إضافة فئة منتجات جديدة">
+                                <Tooltip title="إضافة فئة منتجات جديدة">
 
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                endIcon={<AddIcon />}
-                                onClick={toggleOpenAddBranch}
-                            >
-                                <Typography noWrap> إضافة جديد </Typography>
-                            </Button>
-                        </Tooltip>
-                    </Box>
-                    <BranchesList />
-                    <BranchesDetailsForm
-                        open={openAddBranch}
-                        handleClose={() => setOpenAddBranch(false)}
-                        mode={UI_FROM_MODE.NEW}
-                    />
-                </Paper>
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        endIcon={<AddIcon />}
+                                        onClick={toggleOpenAddBranch}
+                                    >
+                                        <Typography noWrap> إضافة جديد </Typography>
+                                    </Button>
+                                </Tooltip>
+                            </Box>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <BranchesList />
+                        </AccordionDetails>
+
+                        <BranchesDetailsForm
+                            open={openAddBranch}
+                            handleClose={() => setOpenAddBranch(false)}
+                            mode={UI_FROM_MODE.NEW}
+                        />
+                    </Accordion>
             </Grid>
             <Grid item xs={12} lg={6}>
                 <Paper className={classes.paper}>

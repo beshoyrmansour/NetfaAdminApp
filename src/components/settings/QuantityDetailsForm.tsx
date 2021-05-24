@@ -51,11 +51,16 @@ const QuantityDetailsForm = (props: Props) => {
     const selectedQuantity = useSelector((state: AppState) => state.settings.selectedQuantity);
     const isLoadingSelectedQuantity = useSelector((state: AppState) => state.settings.isLoadingSelectedQuantity);
 
-    const [value, setValue] = React.useState<number | undefined>(undefined);
     const [enName, setEnName] = React.useState<string>('');
     const [arName, setArName] = React.useState<string>('');
+    const [value, setValue] = React.useState<number | undefined>(undefined);
     const [isFormValid, setIsFormValid] = React.useState<boolean>(false);
-
+    const formCleanUpAndClose = () => {
+        setEnName("");
+        setArName("");
+        setValue(undefined);
+        handleClose();
+    }
     const handleEnNameChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setEnName(event.target.value as string)
     }
@@ -83,14 +88,15 @@ const QuantityDetailsForm = (props: Props) => {
             case UI_FROM_MODE.NEW:
                 addNewQuantity(enName, arName, value as number).then(res => {
                     loadQuantitiesList(dispatch);
+                    formCleanUpAndClose();
                 });
                 break;
             case UI_FROM_MODE.EDIT:
                 editQuantity(enName, arName, value as number, selectedQuantity.id).then(res => {
                     loadQuantitiesList(dispatch);
-                    handleClose();
+                    formCleanUpAndClose();
                 })
-                break; break;
+                break;
 
             default:
                 break;
@@ -100,11 +106,28 @@ const QuantityDetailsForm = (props: Props) => {
     React.useEffect(() => {
         setIsFormValid(enName !== '' &&
             value !== undefined &&
-            arName !== '')
-
+            arName !== '');
     }, [enName,
         value,
-        arName])
+        arName]);
+
+    React.useEffect(() => {
+        switch (mode) {
+            case UI_FROM_MODE.EDIT:
+            case UI_FROM_MODE.VIEW:
+                setEnName(selectedQuantity?.enName || '');
+                setArName(selectedQuantity?.arName || '');
+                setValue(selectedQuantity?.value || undefined);
+                break;
+            case UI_FROM_MODE.NEW:
+                setEnName("");
+                setArName("");
+                setValue(undefined);
+                break;
+            default:
+                break;
+        }
+    }, [mode])
 
     return (
         <Drawer
@@ -116,7 +139,7 @@ const QuantityDetailsForm = (props: Props) => {
             <DialogTitle id="alert-dialog-title">
                 <div className={classes.title}>
                     <Typography variant="h4">إضافة كميةافتراضية جديدة</Typography>
-                    <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+                    <IconButton onClick={formCleanUpAndClose}><CloseIcon /></IconButton>
                 </div>
             </DialogTitle>
             <DialogContent>

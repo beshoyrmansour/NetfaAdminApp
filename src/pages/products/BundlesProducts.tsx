@@ -40,7 +40,7 @@ import BundleForm from '../../components/BundleForm';
 import { TOGGLE_MODES, UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { getSingleOrderItemsProducts, toggleProducts, deleteProductsBulk, loadSingleOrderItemsProducts } from '../../redux/actions/bundlesActions';
+import { toggleProducts, deleteProductsBulk, loadBundleProducts } from '../../redux/actions/bundlesActions';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import ConfirmDialog from '../../components/ConfirmDialog';
 
@@ -233,7 +233,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
                 payload: true
             });
             deleteProductsBulk(selectedIds).then(() => {
-                loadSingleOrderItemsProducts(dispatch);
+                loadBundleProducts(dispatch);
                 setOpenConfirmDialog(false);
                 setConfirmDialogTitle('');
                 setConfirmDialogMessage('');
@@ -259,7 +259,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
                 </Typography>
             ) : (
                 <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-                    المنتجات الفردية
+                    مجموعات المنتجات
                 </Typography>
             )}
             {selectedIds.length > 0 ? (
@@ -276,7 +276,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
                     </Tooltip>
                 </>
             ) : (
-                <Tooltip title="إضافة منتج جديد">
+                <Tooltip title="إضافة مجموعة جديدة">
                     <Button
                         variant="contained"
                         color="secondary"
@@ -434,7 +434,7 @@ export default function BundlesProducts() {
             type: BundlesActionTypes.SET_IS_LOADING_PRODUCTS,
             payload: true
         })
-        loadSingleOrderItemsProducts(dispatch);
+        loadBundleProducts(dispatch);
     }, [])
 
 
@@ -451,7 +451,7 @@ export default function BundlesProducts() {
                 payload: true
             });
             toggleProducts([product.id as number], product.isAvailableForPurchase).then(() => {
-                loadSingleOrderItemsProducts(dispatch);
+                loadBundleProducts(dispatch);
                 setOpenConfirmDialog(false);
                 setConfirmDialogTitle('');
                 setConfirmDialogMessage('');

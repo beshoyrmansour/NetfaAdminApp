@@ -3,9 +3,9 @@ import { TProduct } from "./Products";
 
 export type TBundle = {
 
-    id: number; // 0,
-    addedDate: string; // "2021-05-13T06:31:52.071Z",
-    modifiedDate: string; // "2021-05-13T06:31:52.071Z",
+    id?: number; // 0,
+    addedDate?: string; // "2021-05-13T06:31:52.071Z",
+    modifiedDate?: string; // "2021-05-13T06:31:52.071Z",
     enName: string; // "string",
     arName: string; // "string",
     thumbnailBase64: string; // "string",
@@ -14,8 +14,9 @@ export type TBundle = {
     categoryId: number; // 0,
     enDescription: string; // "string",
     arDescription: string; // "string",
-    mainImageId: number; // 0,
-    content: TProduct[];
+    mainImageId?: number; // 0,
+    content?: TProduct[];
+    contentIds?: number[];
 }
 
 
@@ -27,7 +28,7 @@ export enum BundlesActionTypes {
     REMOVE_PRODUCT = "BUNDLES__REMOVE_PRODUCT",
     UPDATE_PRODUCT = "BUNDLES__UPDATE_PRODUCT",
     SET_IS_LOADING_PRODUCTS = "BUNDLES__SET_IS_LOADING_PRODUCTS",
-    
+
 }
 export interface IGetBundlesListReq {
     (

@@ -55,17 +55,7 @@ interface Props {
 }
 
 const BranchesDetailsForm = (props: Props) => {
-
-    const classes = useStyles();
-    const dispatch = useDispatch();
-
-    const { open, handleClose, mode } = props;
-    const selectedBranch = useSelector((state: AppState) => state.settings.selectedBranch as TBranch);
-    const isLoadingSelectedBranch = useSelector((state: AppState) => state.settings.isLoadingSelectedBranch);
-
-    const [enName, setEnName] = React.useState<string>(selectedBranch.enBranchName || '');
-    const [arName, setArName] = React.useState<string>(selectedBranch.arBranchName || '');
-    const [address, setAddress] = React.useState<TAddress>(selectedBranch.address || {
+    const emptyAddress: TAddress = {
         addressTitle: '',
         buildingNumber: '',
         streetName: '',
@@ -77,11 +67,27 @@ const BranchesDetailsForm = (props: Props) => {
         longitude: 0,
         recipientPhoneNumber: '',
         nearestLandMark: '',
-    });
+    }
+    const classes = useStyles();
+    const dispatch = useDispatch();
+
+    const { open, handleClose, mode } = props;
+    const selectedBranch = useSelector((state: AppState) => state.settings.selectedBranch as TBranch);
+    const isLoadingSelectedBranch = useSelector((state: AppState) => state.settings.isLoadingSelectedBranch);
+
+    const [enName, setEnName] = React.useState<string>(selectedBranch.enBranchName || '');
+    const [arName, setArName] = React.useState<string>(selectedBranch.arBranchName || '');
+    const [address, setAddress] = React.useState<TAddress>(selectedBranch.address || emptyAddress);
     // const [isFormValid, setIsFormValid] = React.useState<boolean>(false);
     const [isFormValid, setIsFormValid] = React.useState<boolean>(true);
     const [isAddressFormValid, setIsAddressFormValid] = React.useState<boolean>(true);
 
+    const formCleanUpAndClose = () => {
+        setEnName('')
+        setArName('')
+        setAddress(emptyAddress);
+        handleClose();
+    }
 
     const handleEnNameChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setEnName(event.target.value as string)
@@ -120,13 +126,13 @@ const BranchesDetailsForm = (props: Props) => {
             case UI_FROM_MODE.NEW:
                 addNewBranch(enName, arName, address).then(res => {
                     loadBranchesList(dispatch)
-                    handleClose();
+                    formCleanUpAndClose();
                 })
                 break;
             case UI_FROM_MODE.EDIT:
                 editBranch(enName, arName, address, selectedBranch.id as number).then(res => {
                     loadBranchesList(dispatch)
-                    handleClose();
+                    formCleanUpAndClose();
                 })
                 break; break;
 
@@ -146,6 +152,23 @@ const BranchesDetailsForm = (props: Props) => {
         address,
         arName])
 
+    React.useEffect(() => {
+        switch (mode) {
+            case UI_FROM_MODE.EDIT:
+            case UI_FROM_MODE.VIEW:
+                setEnName(selectedBranch?.enBranchName || '')
+                setArName(selectedBranch?.arBranchName || '')
+                setAddress(selectedBranch?.address || emptyAddress);
+                break;
+            case UI_FROM_MODE.NEW:
+                setEnName('')
+                setArName('')
+                setAddress(emptyAddress);
+                break;
+            default:
+                break;
+        }
+    }, [mode])
 
     return (
         <Drawer
@@ -158,7 +181,7 @@ const BranchesDetailsForm = (props: Props) => {
                     <Typography variant="h4">{mode !== UI_FROM_MODE.NEW ? selectedBranch.enBranchName : "إضافة فرع جديد"}</Typography>
                     <div>
                         {/* {mode === UI_FROM_MODE.VIEW && <IconButton onClick={() => changeMode(UI_FROM_MODE.EDIT)}><EditIcon color="primary" /></IconButton>} */}
-                        <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+                        <IconButton onClick={formCleanUpAndClose}><CloseIcon /></IconButton>
 
                     </div>
                 </div>

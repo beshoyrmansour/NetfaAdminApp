@@ -62,6 +62,11 @@ const CategoryDetailsForm = (props: Props) => {
     const [arName, setArName] = React.useState<string>(selectedCategory.arName || '');
     const [isFormValid, setIsFormValid] = React.useState<boolean>(false);
 
+    const formCleanUpAndClose = () => {
+        setEnName("");
+        setArName("");
+        handleClose();
+    }
 
     const handleEnNameChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setEnName(event.target.value as string)
@@ -85,13 +90,13 @@ const CategoryDetailsForm = (props: Props) => {
             case UI_FROM_MODE.NEW:
                 addNewCategory(enName, arName).then(res => {
                     loadCategoriesList(dispatch);
-                    handleClose();
+                    formCleanUpAndClose();
                 })
                 break;
             case UI_FROM_MODE.EDIT:
                 editCategory(enName, arName, selectedCategory.id).then(res => {
                     loadCategoriesList(dispatch);
-                    handleClose();
+                    formCleanUpAndClose();
                 })
                 break; break;
 
@@ -105,6 +110,21 @@ const CategoryDetailsForm = (props: Props) => {
 
     }, [enName, arName])
 
+    React.useEffect(() => {
+        switch (mode) {
+            case UI_FROM_MODE.EDIT:
+            case UI_FROM_MODE.VIEW:
+                setEnName(selectedCategory?.enName || '');
+                setArName(selectedCategory?.arName || '');
+                break;
+            case UI_FROM_MODE.NEW:
+                setEnName("");
+                setArName("");
+                break;
+            default:
+                break;
+        }
+    }, [mode])
     return (
         <Drawer
             variant="temporary"
@@ -116,7 +136,7 @@ const CategoryDetailsForm = (props: Props) => {
                     <Typography variant="h4">{mode !== UI_FROM_MODE.NEW ? selectedCategory.arName : "إضافة فئة منتجات جديدة"}</Typography>
                     <div>
                         {/* {mode === UI_FROM_MODE.VIEW && <IconButton onClick={() => changeMode(UI_FROM_MODE.EDIT)}><EditIcon color="primary" /></IconButton>} */}
-                        <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+                        <IconButton onClick={formCleanUpAndClose}><CloseIcon /></IconButton>
 
                     </div>
                 </div>

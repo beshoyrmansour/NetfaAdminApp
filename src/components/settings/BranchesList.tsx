@@ -200,7 +200,7 @@ const BranchesList = (props: Props) => {
                     </Table>
                 </TableContainer>
                     : (<Box className={classes.noItemsText} display="flex" justifyContent="center" alignItems="center">
-                        <Typography>لا يوجد</Typography>
+                        <Typography>لا يوجد فروع</Typography>
                     </Box>)
 
                 )}
