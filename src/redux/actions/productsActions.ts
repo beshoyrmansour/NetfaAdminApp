@@ -19,7 +19,6 @@ export const getSingleOrderItemsProducts: IGetSingleOrderItemsProductsReq = (Ava
 }
 
 export const createOrUpdateSingleItemProduct = (mainImageFile: any, newProduct: TProduct, mode: UI_FROM_MODE) => {
-    console.log({ newProduct, mainImageFile });
     return axios({
         method: mode !== UI_FROM_MODE.NEW ? 'put' : 'post',
         url: END_POINTS.SINGLE_ORDER_ITEMS + (mode !== UI_FROM_MODE.NEW ? `/${newProduct?.id}` : ''),
@@ -53,10 +52,6 @@ export const deleteProduct: IDeleteProductReq = (porductId) => {
 
 export const loadSingleOrderItemsProducts: (dispatch: any) => void = (dispatch) => {
     getSingleOrderItemsProducts().then((res) => {
-        console.log({
-            payloadRes: res
-        });
-
         if (res.status === 200) {
             dispatch({
                 type: ProductsActionTypes.FETCH_ALL_PRODUCTS,

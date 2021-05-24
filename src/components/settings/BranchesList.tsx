@@ -104,14 +104,12 @@ const BranchesList = (props: Props) => {
     }
 
     const handleDeleteBranch: (branch: TBranch) => void = (branch) => {
-        console.log({ branch });
         setSelectedBranch(selectedBranch);
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد حذف الفرع "${branch.arBranchName}"`);
         setConfirmDialogSubmit('حذف');
         setOpenConfirmDialog(true);
         const _deleteBranch: () => void = () => {
-            console.log({ handleDeleteBranch_OnSubmit: branch });
             dispatch({
                 type: BranchesActionTypes.SET_IS_LOADING_BRANCHES,
                 payload: true
@@ -137,12 +135,9 @@ const BranchesList = (props: Props) => {
 
     }
     const handleConfirmDialogCancel: () => void = () => {
-        console.log({ handleConfirmDialogCancel: selectedBranch });
-        setOpenConfirmDialog(false);
-        console.log({ selectedBranch });
+       setOpenConfirmDialog(false);
     }
     const handleOpenBranchesDetailsFormOnClick = (branch: TBranch, mode: UI_FROM_MODE) => {
-        console.log({ handleViewProductDetailsOnClick: branch });
         dispatch({
             type: BranchesActionTypes.SET_SELECTED_BRANCH,
             payload: branch

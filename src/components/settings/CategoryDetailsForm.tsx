@@ -77,7 +77,6 @@ const CategoryDetailsForm = (props: Props) => {
     React.useEffect(() => {
         setEnName(selectedCategory.enName)
         setArName(selectedCategory.arName)
-        console.log({ mode, VIEW: UI_FROM_MODE.VIEW, ISVIEW: mode === UI_FROM_MODE.VIEW });
     }, [selectedCategory])
 
     const handleSubmit = () => {

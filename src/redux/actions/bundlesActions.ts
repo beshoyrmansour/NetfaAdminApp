@@ -9,7 +9,6 @@ export const getBundleProducts: IGetSingleOrderItemsProductsReq = (AvailableForP
 }
 
 export const createOrUpdateBundleProduct = (mainImageFile: any, newProduct: TBundle, mode: UI_FROM_MODE) => {
-    console.log({ newProduct, mainImageFile });
     return axios({
         method: mode !== UI_FROM_MODE.NEW ? 'put' : 'post',
         url: END_POINTS.BUNDLES + (mode !== UI_FROM_MODE.NEW ? `/${newProduct?.id}` : ''),
@@ -43,10 +42,6 @@ export const deleteProduct: IDeleteProductReq = (porductId) => {
 
 export const loadBundleProducts: (dispatch: any) => void = (dispatch) => {
     getBundleProducts().then((res) => {
-        console.log({
-            payloadRes: res
-        });
-
         if (res.status === 200) {
             dispatch({
                 type: BundlesActionTypes.FETCH_ALL_PRODUCTS,

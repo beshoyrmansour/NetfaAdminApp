@@ -24,8 +24,7 @@ export const bundlesReducer = (state: ProductsReducerType = productsInitReducerS
             };
 
         case BundlesActionTypes.SET_SELECTED_PRODUCT:
-            console.log(BundlesActionTypes.SET_SELECTED_PRODUCT, action.payload);
-            return {
+           return {
                 ...state,
                 isLoadingSelectedProduct: false,
                 selectedProduct: action.payload

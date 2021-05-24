@@ -21,10 +21,6 @@ export const deleteCategory: IDeleteCategoryReq = (category) => {
 
 export const loadCategoriesList: (dispatch: any) => void = (dispatch) => {
     getCategoriesList().then((res) => {
-        console.log({
-            payloadRes: res
-        });
-
         if (res.status === 200) {
             dispatch({
                 type: SettingActionTypes.FETCH_ALL_CATEGORIES,

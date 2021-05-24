@@ -29,10 +29,6 @@ export const deleteQuantity: IDeleteQuantityReq = (quantity) => {
 
 export const loadQuantitiesList: (dispatch: any) => void = (dispatch) => {
     getQuantitiesList().then((res) => {
-        console.log({
-            payloadRes: res
-        });
-
         if (res.status === 200) {
             dispatch({
                 type: SettingActionTypes.FETCH_ALL_QUANTITIES,

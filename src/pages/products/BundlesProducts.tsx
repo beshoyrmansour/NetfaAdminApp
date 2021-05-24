@@ -202,7 +202,6 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
 
 
     const toggleOpenAddNewProduct = () => {
-        console.log(openAddNewProduct);
         setOpenAddNewProduct((prevOpenAddNewProduct) => !prevOpenAddNewProduct)
     }
 
@@ -220,14 +219,11 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     }, [selectedIds])
 
     const handleDeleteProducts = () => {
-
-        console.log({ selectredProduct });
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد حذف ${selectredProduct.length} المنتجات قائمة المنتجات علي التطبيق`);
         setConfirmDialogSubmit('حذف');
         setOpenConfirmDialog(true);
         const _toggleProduct: () => void = () => {
-            console.log({ handleDeleteProducts: selectredProduct });
             dispatch({
                 type: BundlesActionTypes.SET_IS_LOADING_PRODUCTS,
                 payload: true
@@ -363,7 +359,6 @@ export default function BundlesProducts() {
 
     const [openProductDetails, setOpenProductDetails] = useState(false)
     const toggleOpenProductDetails = () => {
-        console.log(openProductDetails);
         setOpenProductDetails((prevOpenProductDetails) => !prevOpenProductDetails)
     }
 
@@ -410,7 +405,6 @@ export default function BundlesProducts() {
         setPage(0);
     };
     const handleOpenBundleFormOnClick = (product: TProduct, mode: UI_FROM_MODE) => {
-        console.log({ handleViewProductDetailsOnClick: product });
         dispatch({
             type: BundlesActionTypes.SET_SELECTED_PRODUCT,
             payload: product
@@ -439,13 +433,11 @@ export default function BundlesProducts() {
 
 
     const handleToggleProduct: (product: TProduct) => void = (product) => {
-        console.log({ product });
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد ${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'} المنتج "${product.arName}"  ${product.isAvailableForPurchase ? 'من' : 'في'} قائمة المنتجات علي التطبيق`);
         setConfirmDialogSubmit(`${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'}`);
         setOpenConfirmDialog(true);
         const _toggleProduct: () => void = () => {
-            console.log({ handleToggleProduct: product });
             dispatch({
                 type: BundlesActionTypes.SET_IS_LOADING_PRODUCTS,
                 payload: true

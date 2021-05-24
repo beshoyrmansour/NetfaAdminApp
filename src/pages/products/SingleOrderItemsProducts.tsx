@@ -201,7 +201,6 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
 
 
     const toggleOpenAddNewProduct = () => {
-        console.log(openAddNewProduct);
         setOpenAddNewProduct((prevOpenAddNewProduct) => !prevOpenAddNewProduct)
     }
 
@@ -225,7 +224,6 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
         setConfirmDialogSubmit('حذف');
         setOpenConfirmDialog(true);
         const _toggleProduct: () => void = () => {
-            console.log({ handleDeleteProducts: selectredProduct });
             dispatch({
                 type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
                 payload: true
@@ -362,8 +360,7 @@ export default function SingleOrderItemsProducts() {
 
     const [openProductDetails, setOpenProductDetails] = useState(false)
     const toggleOpenProductDetails = () => {
-        console.log(openProductDetails);
-        setOpenProductDetails((prevOpenProductDetails) => !prevOpenProductDetails)
+       setOpenProductDetails((prevOpenProductDetails) => !prevOpenProductDetails)
     }
 
 
@@ -377,8 +374,7 @@ export default function SingleOrderItemsProducts() {
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
             const newSelected = products.map((n: TProduct) => (n.id as number).toString());
-            console.log({ newSelected });
-            setSelected(newSelected);
+           setSelected(newSelected);
             return;
         }
         setSelected([]);
@@ -413,7 +409,6 @@ export default function SingleOrderItemsProducts() {
         setPage(0);
     };
     const handleOpenProductFormOnClick = (product: TProduct, mode: UI_FROM_MODE) => {
-        console.log({ handleViewProductDetailsOnClick: product });
         dispatch({
             type: ProductsActionTypes.SET_SELECTED_PRODUCT,
             payload: product
@@ -442,13 +437,11 @@ export default function SingleOrderItemsProducts() {
 
 
     const handleToggleProduct: (product: TProduct) => void = (product) => {
-        console.log({ product });
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد ${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'} المنتج "${product.arName}"  ${product.isAvailableForPurchase ? 'من' : 'في'} قائمة المنتجات علي التطبيق`);
         setConfirmDialogSubmit(`${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'}`);
         setOpenConfirmDialog(true);
         const _toggleProduct: () => void = () => {
-            console.log({ handleToggleProduct: product });
             dispatch({
                 type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
                 payload: true

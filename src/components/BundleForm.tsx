@@ -190,9 +190,6 @@ const BundleForm = (props: Props) => {
             const reader = new FileReader();
             reader.onload = _handleReaderLoaded
             reader.readAsBinaryString(event.target.files[0])
-
-            console.log({ reader: reader.result });
-
             setThumbnailBase64(reader.result as string)
             setThumbnailLink(imageFileURL);
             setThumbnailFile(event.target.files[0]);
@@ -217,13 +214,11 @@ const BundleForm = (props: Props) => {
     };
 
     const handleDeleteProduct: (product: TProduct) => void = (product) => {
-        console.log({ product });
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد حذف المنتج من قائمة المنتجات`);
         setConfirmDialogSubmit("حذف");
         setOpenConfirmDialog(true);
         const _deleteProduct: () => void = () => {
-            console.log({ handleDeleteProduct: product });
             dispatch({
                 type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
                 payload: true
@@ -240,13 +235,11 @@ const BundleForm = (props: Props) => {
     }
 
     const handleToggleProduct: (product: TProduct) => void = (product) => {
-        console.log({ product });
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد ${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'} المنتج "${product.arName}"  ${product.isAvailableForPurchase ? 'من' : 'في'} قائمة المنتجات علي التطبيق`);
         setConfirmDialogSubmit(`${product.isAvailableForPurchase ? 'اخفاء' : 'إظهار'}`);
         setOpenConfirmDialog(true);
         const _toggleProduct: () => void = () => {
-            console.log({ handleToggleProduct: product });
             dispatch({
                 type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
                 payload: true
@@ -296,8 +289,6 @@ const BundleForm = (props: Props) => {
     ])
 
     React.useEffect(() => {
-        console.log({ selectedProduct });
-
         switch (mode) {
             case UI_FROM_MODE.EDIT:
             case UI_FROM_MODE.VIEW:
@@ -322,7 +313,6 @@ const BundleForm = (props: Props) => {
     }, [mode]);
 
     const handleSingleItemProductSubmit = () => {
-        console.log("handleSubmitEditProduct");
         dispatch({
             type: ProductsActionTypes.SET_IS_LOADING_PRODUCTS,
             payload: true
@@ -374,7 +364,6 @@ const BundleForm = (props: Props) => {
 
     React.useEffect(() => {
         getCategoriesList().then((res: any) => {
-            console.log({ res });
             if (res?.status === 200) {
                 setCategoriesList(res?.data?.categories)
             } else {
@@ -383,7 +372,6 @@ const BundleForm = (props: Props) => {
         })
 
         getQuantitiesList().then((res: any) => {
-            console.log({ res });
             if (res?.status === 200) {
                 setQuantitiesList(res?.data)
             } else {
@@ -529,7 +517,7 @@ const BundleForm = (props: Props) => {
                                     <em>None</em>
                                 </MenuItem>
                                 {categoriesList.map((cat: TCategory) => (
-                                    <MenuItem value={cat.id}>{cat?.arName}</MenuItem>
+                                    <MenuItem key={cat.id} value={cat.id}>{cat?.arName}</MenuItem>
 
                                 ))}
                             </Select>

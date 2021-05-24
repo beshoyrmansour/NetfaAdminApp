@@ -101,21 +101,11 @@ const BranchesDetailsForm = (props: Props) => {
         setEnName(selectedBranch?.enBranchName)
         setArName(selectedBranch?.arBranchName)
         setAddress(selectedBranch?.address)
-        console.log({ mode, VIEW: UI_FROM_MODE.VIEW, ISVIEW: mode === UI_FROM_MODE.VIEW });
-
         return () => {
 
         }
     }, [selectedBranch])
 
-    const __handleSubmit = () => {
-        console.log({
-            enName,
-            arName,
-            address,
-        });
-
-    }
     const handleSubmit = () => {
         setIsFormValid(false);
         dispatch({
@@ -142,8 +132,6 @@ const BranchesDetailsForm = (props: Props) => {
     };
 
     React.useEffect(() => {
-        console.log({ isAddressFormValid });
-
         setIsFormValid(enName !== '' &&
             isAddressFormValid &&
             arName !== '')

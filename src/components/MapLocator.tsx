@@ -61,8 +61,6 @@ const MapLocator = (props: Props) => {
     const { latitude, longitude, updateLatitude, updateLongitude } = props;
     // const [anchor, setAnchor] = React.useState<Point>([21.6274891, 39.1396403]);
     const updateLocation = (v: Point) => {
-        console.log({ v });
-
         updateLatitude(v[0])
         updateLongitude(v[1])
     }

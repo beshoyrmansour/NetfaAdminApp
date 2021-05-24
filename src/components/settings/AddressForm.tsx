@@ -84,10 +84,6 @@ const AddressForm = (props: Props) => {
     }
 
     const handleAddressChange = (name: string, value: any) => {
-        console.log(
-            { [name]: value }
-        );
-
         setAddress((prevAaddress: TAddress) => ({ ...prevAaddress, [name]: value }))
     }
 

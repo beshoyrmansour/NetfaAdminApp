@@ -65,10 +65,6 @@ const QuantitiesList = (props: Props) => {
 
     const loadQuantitiesList: () => void = () => {
         getQuantitiesList().then((res: AxiosResponse) => {
-            console.log({
-                payloadRes: res
-            });
-
             if (res.status === 200) {
                 dispatch({
                     type: SettingActionTypes.FETCH_ALL_QUANTITIES,
@@ -86,15 +82,13 @@ const QuantitiesList = (props: Props) => {
     }, [])
 
     const handleDeleteQuantity: (quantity: TQuantity) => void = (quantity) => {
-        console.log({ quantity });
         setSelectedQuantity(selectedQuantity);
         setConfirmDialogTitle(`هل أنت متأكد`);
         setConfirmDialogMessage(`هل تريد حذف الكمية الإفتراضية "${quantity.arName}"`);
         setConfirmDialogSubmit('حذف');
         setOpenConfirmDialog(true);
         const _deleteQuantity: () => void = () => {
-            console.log({ handleDeleteQuantity_OnSubmit: quantity });
-            dispatch({
+           dispatch({
                 type: SettingActionTypes.SET_IS_LOADING_QUANTITIES,
                 payload: true
             });
@@ -128,7 +122,6 @@ const QuantitiesList = (props: Props) => {
     }
 
     const handleConfirmDialogCancel: () => void = () => {
-        console.log({ handleConfirmDialogCancel: selectedQuantity });
         setOpenConfirmDialog(false);
     }
 

@@ -107,10 +107,6 @@ export const settingsReducer = (state: TSettingReducer = settingInitReducerState
             }
 
         case BranchesActionTypes.FETCH_ALL_BRANCHES:
-            console.log({
-                DATA: action.payload
-            });
-
             return {
                 ...state,
                 isLoadingBranches: false,

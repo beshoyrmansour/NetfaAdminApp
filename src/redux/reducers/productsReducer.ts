@@ -23,7 +23,6 @@ export const productsReducer = (state: ProductsReducerType = productsInitReducer
             };
 
         case ProductsActionTypes.SET_SELECTED_PRODUCT:
-            console.log(ProductsActionTypes.SET_SELECTED_PRODUCT, action.payload);
             return {
                 ...state,
                 isLoadingSelectedProduct: false,
