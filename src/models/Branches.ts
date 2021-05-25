@@ -60,6 +60,6 @@ export interface IAddNewBranchReq {
 }
 
 export interface IEditBranchReq {
-    (enName: string, arName: string, address: TAddress, categoryId: number): Promise<AxiosResponse>
+    (enBranchName: string, arBranchName: string, address: TAddress, categoryId: number): Promise<AxiosResponse>
 }
 

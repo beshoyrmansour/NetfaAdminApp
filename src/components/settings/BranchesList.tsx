@@ -1,50 +1,28 @@
-import React, { useState } from 'react';
-import clsx from 'clsx';
+import React from 'react';
 import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
-import Paper from '@material-ui/core/Paper';
-import Switch from '@material-ui/core/Switch';
-import Button from '@material-ui/core/Button';
-import Drawer from '@material-ui/core/Drawer';
 import Tooltip from '@material-ui/core/Tooltip';
-import Toolbar from '@material-ui/core/Toolbar';
-import Checkbox from '@material-ui/core/Checkbox';
 import TableRow from '@material-ui/core/TableRow';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import TablePagination from '@material-ui/core/TablePagination';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Avatar from '@material-ui/core/Avatar';
-import ImageIcon from '@material-ui/icons/Image';
-import CardMedia from '@material-ui/core/CardMedia';
 
-import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
-import SubdirectoryArrowLeftIcon from '@material-ui/icons/SubdirectoryArrowLeft';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import AddIcon from '@material-ui/icons/Add';
-// import FilterListIcon from '@material-ui/icons/FilterList';
-
-import { TProduct, ProductsActionTypes } from '../../models/Products';
-import ProductForm from '../../components/ProductForm';
-import { TOGGLE_MODES, UI_FROM_MODE } from '../../models/configs';
+import { UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { getSingleOrderItemsProducts, toggleProducts, deleteProductsBulk, loadSingleOrderItemsProducts } from '../../redux/actions/productsActions';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { BranchesActionTypes, TBranch } from '../../models/Branches';
 import { deleteBranch, loadBranchesList } from '../../redux/actions/branchActions';
 import BranchesDetailsForm from './BranchesDetailsForm';
+import TableContainer from '@material-ui/core/TableContainer/TableContainer';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
 

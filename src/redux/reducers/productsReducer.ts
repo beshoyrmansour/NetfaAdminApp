@@ -1,4 +1,4 @@
-import { TProduct, ProductsActionType, ProductsActionTypes, ProductsReducerType } from "../../models/Products";
+import {  ProductsActionType, ProductsActionTypes, ProductsReducerType } from "../../models/Products";
 
 export const productsInitReducerState: ProductsReducerType = {
     products: [],

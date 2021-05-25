@@ -5,9 +5,6 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import BundlesProducts from './BundlesProducts';
 import SingleOrderItemsProducts from './SingleOrderItemsProducts';
-import Categories from '../categories/Categories';
-
-
 
 const useStyles = makeStyles((theme: Theme) => ({
     toggleContainer: {

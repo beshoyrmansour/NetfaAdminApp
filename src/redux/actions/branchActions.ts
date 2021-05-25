@@ -14,6 +14,8 @@ export const getBranchesList: IGetBranchesListReq = () => {
 }
 
 export const addNewBranch: IAddNewBranchReq = (enName, arName, address) => {
+    console.log({ address });
+
     return axios.post(END_POINTS.BRANCHES, {
         enBranchName: enName, arBranchName: arName, address: {
             addressTitle: address.addressTitle,
@@ -31,8 +33,8 @@ export const addNewBranch: IAddNewBranchReq = (enName, arName, address) => {
         }
     })
 }
-export const editBranch: IEditBranchReq = (enName, arName, address, branchId) => {
-    return axios.put(END_POINTS.BRANCHES + `/${branchId}`, { enName, arName, address })
+export const editBranch: IEditBranchReq = (enBranchName, arBranchName, address, branchId) => {
+    return axios.put(END_POINTS.BRANCHES + `/${branchId}`, { enBranchName, arBranchName, address })
 }
 
 export const deleteBranch: IDeleteBranchReq = (branchId) => {

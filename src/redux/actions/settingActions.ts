@@ -1,5 +1,4 @@
 import axios from "../../api/axios";
-import { TProduct } from "../../models/Products";
 import END_POINTS from '../../api/endPoints';
 import {
     IGetQuantitiesListReq,

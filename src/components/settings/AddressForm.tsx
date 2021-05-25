@@ -84,6 +84,8 @@ const AddressForm = (props: Props) => {
     }
 
     const handleAddressChange = (name: string, value: any) => {
+        console.log({name,value});
+        
         setAddress((prevAaddress: TAddress) => ({ ...prevAaddress, [name]: value }))
     }
 
@@ -109,6 +111,8 @@ const AddressForm = (props: Props) => {
     }
     const handleUnitNumberChange = (event: React.ChangeEvent<{ value: unknown, name: string }>) => {
         setUnitNumber(event.target.value as string);
+        console.log({UnitNumber: event.target.value});
+        
         handleAddressChange(event.target.name, event.target.value as string);
     }
     const handleFloorNumberChange = (event: React.ChangeEvent<{ value: unknown, name: string }>) => {
@@ -274,7 +278,7 @@ const AddressForm = (props: Props) => {
                             }}
                             type="text"
                             value={unitNumber}
-                            name="unitNumberber"
+                            name="unitNumber"
                             onChange={handleUnitNumberChange}
                         />
                     </Grid>
@@ -290,7 +294,7 @@ const AddressForm = (props: Props) => {
                             }}
                             type="text"
                             value={floorNumber}
-                            name="floorNumberer"
+                            name="floorNumber"
                             onChange={handleFloorNumberChange}
                         />
                     </Grid>

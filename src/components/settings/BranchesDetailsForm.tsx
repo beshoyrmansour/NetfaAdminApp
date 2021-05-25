@@ -132,6 +132,9 @@ const BranchesDetailsForm = (props: Props) => {
     };
 
     React.useEffect(() => {
+
+        console.log({useEffectaddress:address});
+        
         setIsFormValid(enName !== '' &&
             isAddressFormValid &&
             arName !== '')
