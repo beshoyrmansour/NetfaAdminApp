@@ -57,6 +57,14 @@ export type ProductsReducerType = {
     isLoadingProducts: boolean,
 };
 
+export interface IAddNewProductsReq {
+    (productData: TProduct): Promise<AxiosResponse>
+}
+export interface IEditProductsReq {
+    (
+        productData: TProduct, productId: string
+    ): Promise<AxiosResponse>
+}
 export interface IToggleProductsReq {
     (
         porductIds: number[],

@@ -20,7 +20,7 @@ import { ProductsActionTypes, TProduct } from '../models/Products';
 import { TOGGLE_MODES, UI_FROM_MODE } from '../models/configs';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../redux/store';
-import { createOrUpdateSingleItemProduct, deleteProduct, loadSingleOrderItemsProducts, toggleProducts } from '../redux/actions/productsActions';
+import { addNewSingleItemProduct, deleteProduct, editSingleItemProduct, loadSingleOrderItemsProducts, toggleProducts } from '../redux/actions/productsActions';
 import { TCategory } from '../models/Categories';
 import { getCategoriesList } from '../redux/actions/categoriesActions';
 import { getQuantitiesList } from '../redux/actions/settingActions';
@@ -28,6 +28,7 @@ import { TQuantity } from '../models/Quantity';
 import ConfirmDialog from './ConfirmDialog';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import { uploadImage } from '../redux/actions/imagesActions';
 
 
 interface Props {
@@ -105,6 +106,7 @@ const ProductForm = (props: Props) => {
     const [enName, setEnName] = React.useState<string>("");
     const [arName, setArName] = React.useState<string>("");
     const [thumbnailBase64, setThumbnailBase64] = React.useState<string>("");
+    const [mainImageBas64, setMainImageBas64] = React.useState<string>("");
     const [unitPrice, setUnitPrice] = React.useState<number | null>(null);
     const [categoryId, setCategoryId] = React.useState<number | null>(null);
     const [defaultQuantityId, setDefaultQuantityId] = React.useState<number | null>(null);
@@ -154,16 +156,20 @@ const ProductForm = (props: Props) => {
     const handleIsAvailableForPurchaseChange = (event: React.ChangeEvent<{ checked: boolean }>) => {
         if (mode !== UI_FROM_MODE.VIEW) setIsAvailableForPurchase(event.target.checked)
     }
-    const _handleReaderLoaded = (readerEvt: any) => {
+    const _handleThumbnailReaderLoaded = (readerEvt: any) => {
         let binaryString = readerEvt.target.result;
         setThumbnailBase64(btoa(binaryString))
+    }
+    const _handleMainImageReaderLoaded = (readerEvt: any) => {
+        let binaryString = readerEvt.target.result;
+        setMainImageBas64(btoa(binaryString))
     }
     const handleThumbnailLinkChange = (event: any) => {
         let reader = new FileReader();
         if (event.target.files.length && event.target.files[0].size < 5242880) {
             const imageFileURL = URL.createObjectURL(event.target.files[0]);
             const reader = new FileReader();
-            reader.onload = _handleReaderLoaded
+            reader.onload = _handleThumbnailReaderLoaded
             reader.readAsBinaryString(event.target.files[0])
             setThumbnailBase64(reader.result as string)
             setThumbnailLink(imageFileURL);
@@ -178,6 +184,10 @@ const ProductForm = (props: Props) => {
     const handleMainImageLinkChange = (event: any) => {
         if (event.target.files.length && event.target.files[0].size < 5242880) {
             const imageFileURL = URL.createObjectURL(event.target.files[0]);
+            const reader = new FileReader();
+            reader.onload = _handleMainImageReaderLoaded
+            reader.readAsBinaryString(event.target.files[0])
+            setMainImageBas64(reader.result as string)
             setMainImageLink(imageFileURL);
             setMainImageFile(event.target.files[0]);
             setMainImageErrorText("");
@@ -228,6 +238,7 @@ const ProductForm = (props: Props) => {
         }
         setOnSubmit((prev) => _toggleProduct)
     }
+
     const handleConfirmDialogCancel: () => void = () => {
         setOpenConfirmDialog(false);
     }
@@ -289,39 +300,59 @@ const ProductForm = (props: Props) => {
             payload: true
         })
         setIsFormValid(false);
+        const productData: TProduct = {
+            enName,
+            arName,
+            thumbnailBase64,
+            unitPrice,
+            categoryId,
+            defaultQuantityId,
+            enDescription,
+            arDescription,
+            isAvailableForPurchase,
+        }
+        switch (mode) {
+            case UI_FROM_MODE.NEW:
+                uploadImage(mainImageBas64, enName).then((res: any) => {
+                    console.log({ uploadImageres: res });
+                })
+                addNewSingleItemProduct(productData).then((res: any) => {
+                    if (res.status === 201) {
 
+                        loadSingleOrderItemsProducts(dispatch);
+                    }
+                    else {
+                        alert('ERROR');
+                        console.log({ error: res });
+                    }
+                }).catch(err => {
+                    console.log({ AFTER__ERR__createOrUpdateSingleItemProduct: err });
+                    // hadleError(err.response?.data?.errors || [{ Gereral: 'حدث خطأ' }]);
+                    console.log({ errors: err.response?.data?.errors });
+                });
+                break;
+            case UI_FROM_MODE.EDIT:
+                uploadImage(mainImageBas64, enName).then((res: any) => {
+                    console.log({ uploadImageres: res });
+                })
+                editSingleItemProduct(productData, selectedProduct.id).then((res: any) => {
+                    if (res.status === 202) {
+                        loadSingleOrderItemsProducts(dispatch);
+                    }
+                    else {
+                        alert('ERROR');
+                        console.log({ error: res });
+                    }
+                }).catch(err => {
+                    console.log({ AFTER__ERR__createOrUpdateSingleItemProduct: err });
+                    // hadleError(err.response?.data?.errors || [{ Gereral: 'حدث خطأ' }]);
+                    console.log({ errors: err.response?.data?.errors });
+                });
+                break;
 
-        createOrUpdateSingleItemProduct(
-            mainImageFile,
-            {
-                enName,
-                arName,
-                thumbnailBase64,
-                unitPrice,
-                categoryId,
-                defaultQuantityId,
-                enDescription,
-                arDescription,
-                isAvailableForPurchase,
-                id: selectedProduct.id
-
-            },
-            mode).then((res: any) => {
-
-                if (res.status === 201) {
-                    loadSingleOrderItemsProducts(dispatch);
-                    // toggleOpenProductForm();
-                }
-                else {
-                    alert('ERROR');
-                    console.log({ error: res });
-
-                }
-            }).catch(err => {
-                console.log({ AFTER__ERR__createOrUpdateSingleItemProduct: err });
-                // hadleError(err.response?.data?.errors || [{ Gereral: 'حدث خطأ' }]);
-                console.log({ errors: err.response?.data?.errors });
-            });
+            default:
+                break;
+        }
     }
 
 
@@ -498,10 +529,10 @@ const ProductForm = (props: Props) => {
                             variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
                             disabled={mode === UI_FROM_MODE.VIEW}
                             fullWidth>
-                            <InputLabel id="demo-simple-select-outlined-label">الفئة</InputLabel>
+                            <InputLabel id="categoryId-select-outlined-label">الفئة</InputLabel>
                             <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
+                                labelId="categoryId-select-outlined-label"
+                                id="categoryId-select-outlined"
                                 value={categoryId}
                                 onChange={handleCategoryIdChange}
                                 label="CategoryId"
@@ -522,10 +553,10 @@ const ProductForm = (props: Props) => {
                             variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
                             disabled={mode === UI_FROM_MODE.VIEW}
                             fullWidth>
-                            <InputLabel id="demo-simple-select-outlined-label">الكمية الافتراضية</InputLabel>
+                            <InputLabel id="defaultQuantityId-select-outlined-label">الكمية الافتراضية</InputLabel>
                             <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
+                                labelId="defaultQuantityId-select-outlined-label"
+                                id="defaultQuantityId-select-outlined"
                                 value={defaultQuantityId}
                                 onChange={handleDefaultQuantityIdChange}
                                 label="categoryId"

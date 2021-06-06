@@ -12,7 +12,7 @@ import './App.css';
 import Header from './components/Header';
 import Products from './pages/products/Products';
 import Orders from './pages/Orders';
-import Users from './pages/Users';
+import Users from './pages/Users/Users';
 import Settings from './pages/Settings';
 
 const useStyles = makeStyles((theme: Theme) => ({
