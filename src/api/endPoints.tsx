@@ -11,4 +11,5 @@ export default {
   CATEGORIES: `${API_URL}/categories`,
   BRANCHES: `${API_URL}/branches`,
   ADDRESSES: `${API_URL}/addresses`,
+  EMPLOYEES: `${API_URL}/employees`,
 };
