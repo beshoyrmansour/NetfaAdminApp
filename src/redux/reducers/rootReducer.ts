@@ -3,11 +3,11 @@ import { combineReducers } from 'redux';
 import { productsReducer } from './productsReducer';
 import { settingsReducer } from './settingsReducer';
 import { bundlesReducer } from './bundlesReducer';
-import { employeesReducer } from './employeesReducer';
+import { usersReducer } from './usersReducer';
 
 export default combineReducers({
     products: productsReducer,
     settings: settingsReducer,
     bundles: bundlesReducer,
-    employees: employeesReducer,
+    users: usersReducer,
 });

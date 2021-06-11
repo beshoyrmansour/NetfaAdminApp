@@ -1,10 +1,8 @@
 import React from 'react';
-import { AxiosResponse } from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Drawer from '@material-ui/core/Drawer';
-import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
@@ -16,21 +14,11 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import Avatar from '@material-ui/core/Avatar';
-import ImageIcon from '@material-ui/icons/Image';
-import CardMedia from '@material-ui/core/CardMedia';
 
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { SettingActionTypes } from '../../models/Settings';
 import { UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
-import { TProduct } from '../../models/Products';
 import { addNewEmploye, loadEmployeesList, editEmployee } from '../../redux/actions/employeesActions';
 import { BranchesActionTypes, TBranch } from '../../models/Branches';
 import { loadBranchesList } from '../../redux/actions/branchActions';
@@ -49,6 +37,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     paddingRight_1: { paddingRight: theme.spacing(1) },
     saveButton: { marginBottom: theme.spacing(1) },
+    branchName: {
+        marginLeft: theme.spacing(2),
+        marginTop: theme.spacing(2)
+    },
 }));
 
 interface Props {
@@ -62,8 +54,8 @@ const EmployeeForm = (props: Props) => {
     const dispatch = useDispatch();
 
     const { open, handleClose, mode } = props;
-    const selectedEmployee = useSelector((state: AppState) => state.employees.selectedEmployee);
-    const isLoadingSelectedEmployee = useSelector((state: AppState) => state.employees.isLoadingSelectedEmployee);
+    const selectedEmployee = useSelector((state: AppState) => state.users.selectedEmployee);
+    const isLoadingSelectedEmployee = useSelector((state: AppState) => state.users.isLoadingSelectedEmployee);
     const branches = useSelector((state: AppState) => state.settings.branches);
     const isLoadingBranches = useSelector((state: AppState) => state.settings.isLoadingBranches);
 
@@ -107,11 +99,10 @@ const EmployeeForm = (props: Props) => {
         loadBranchesList(dispatch);
     }, []);
     React.useEffect(() => {
-        setEmail(selectedEmployee.email)
-        setName(selectedEmployee.arName)
-        setPassword(selectedEmployee.password)
-        setPhoneNumber(selectedEmployee.phoneNumber)
-        setEmploymentBranchId(selectedEmployee.employmentBranchId)
+        setEmail(selectedEmployee.email);
+        setName(selectedEmployee.arName);
+        setPhoneNumber(selectedEmployee.phoneNumber);
+        setEmploymentBranchId(selectedEmployee.employmentBranchId);
     }, [selectedEmployee])
 
     const handleSubmit = () => {
@@ -128,29 +119,50 @@ const EmployeeForm = (props: Props) => {
                 })
                 break;
             case UI_FROM_MODE.EDIT:
+            case UI_FROM_MODE.EDIT_PASSWORD:
                 editEmployee({ email, name, password, phoneNumber, employmentBranchId }, selectedEmployee.id).then(res => {
                     loadEmployeesList(dispatch);
                     formCleanUpAndClose();
                 })
-                break; break;
-
+                break;
             default:
                 break;
         }
     };
 
     React.useEffect(() => {
-        setIsFormValid(email !== '' && name !== '')
+        console.log({
+            email,
+            password,
+            employmentBranchId,
+            name,
 
-    }, [email, name])
+            flag_email: email !== '',
+            flag_password: password !== '',
+            flag_employmentBranchId: employmentBranchId !== undefined,
+            flag_employmentBranchId_length: password.length > 8,
+            flag_name: name !== '',
+        });
+
+        setIsFormValid(
+            email !== '' &&
+            password !== '' &&
+            password.length > 8 &&
+            employmentBranchId !== undefined &&
+            name !== '')
+
+    }, [email, name, password, employmentBranchId])
 
     React.useEffect(() => {
         switch (mode) {
             case UI_FROM_MODE.EDIT:
+            case UI_FROM_MODE.EDIT_PASSWORD:
             case UI_FROM_MODE.VIEW:
+                console.log({ selectedEmployee });
+
                 setEmail(selectedEmployee?.email || '');
                 setName(selectedEmployee?.name || '');
-                setPassword(selectedEmployee?.password || '');
+                setPassword('');
                 setPhoneNumber(selectedEmployee?.phoneNumber || '');
                 setEmploymentBranchId(selectedEmployee?.employmentBranchId || '');
                 break;
@@ -185,7 +197,7 @@ const EmployeeForm = (props: Props) => {
                 <Grid direction="row" container
                     justify="flex-start"
                     alignItems="center" >
-                    <Grid item xs={12} className={classes.paddingRight_1}>
+                    {(mode === UI_FROM_MODE.EDIT || mode === UI_FROM_MODE.NEW) && <Grid item xs={12} className={classes.paddingRight_1}>
                         <TextField
                             className={classes.textField}
                             required
@@ -193,16 +205,16 @@ const EmployeeForm = (props: Props) => {
                             fullWidth
                             id="outlined-required"
                             label="اسم الموظف"
-                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
+                            variant={mode !== UI_FROM_MODE.EDIT ? "outlined" : "standard"}
                             InputProps={{
-                                readOnly: mode === UI_FROM_MODE.VIEW,
+                                readOnly: mode !== UI_FROM_MODE.EDIT && mode !== UI_FROM_MODE.NEW,
                             }}
                             type="text"
                             value={name}
                             onChange={handleNameChange}
 
                         />
-                    </Grid>
+                    </Grid>}
                     <Grid item xs={6} className={classes.paddingRight_1}>
                         <TextField
                             className={classes.textField}
@@ -211,9 +223,9 @@ const EmployeeForm = (props: Props) => {
                             fullWidth
                             id="outlined-required"
                             label="البريد الإلكترونى"
-                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
+                            variant={mode !== UI_FROM_MODE.EDIT ? "outlined" : "standard"}
                             InputProps={{
-                                readOnly: mode === UI_FROM_MODE.VIEW,
+                                readOnly: mode !== UI_FROM_MODE.EDIT && mode !== UI_FROM_MODE.NEW,
                             }}
                             type="text"
                             value={email}
@@ -228,9 +240,9 @@ const EmployeeForm = (props: Props) => {
                             fullWidth
                             id="outlined-required"
                             label="رقم الهاتف"
-                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
+                            variant={mode !== UI_FROM_MODE.EDIT ? "outlined" : "standard"}
                             InputProps={{
-                                readOnly: mode === UI_FROM_MODE.VIEW,
+                                readOnly: mode !== UI_FROM_MODE.EDIT && mode !== UI_FROM_MODE.NEW,
                             }}
                             type="text"
                             value={phoneNumber}
@@ -238,36 +250,57 @@ const EmployeeForm = (props: Props) => {
                         />
                     </Grid>
                     <Grid item xs={6} className={classes.paddingRight_1}>
-                        <FormControl
-                            variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "outlined"}
-                            disabled={isLoadingBranches || mode === UI_FROM_MODE.VIEW}
-                            fullWidth>
-                            <InputLabel id="demo-simple-select-outlined-label">الفرع التابع له</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                value={employmentBranchId}
-                                onChange={handleEmploymentBranchIdChange}
-                                label="CategoryId"
-                            >
-                                <MenuItem value="">
-                                    <em>None</em>
-                                </MenuItem>
-                                {branches.map((branch: TBranch) => (
-                                    <MenuItem key={branch.id} value={branch.id}>{branch?.arBranchName}</MenuItem>
+                        {(mode === UI_FROM_MODE.EDIT || mode === UI_FROM_MODE.NEW) ?
+                            <FormControl
+                                variant={mode !== UI_FROM_MODE.EDIT ? "outlined" : "outlined"}
+                                disabled={isLoadingBranches || mode !== UI_FROM_MODE.EDIT && mode !== UI_FROM_MODE.NEW}
+                                fullWidth>
+                                <InputLabel id="demo-simple-select-outlined-label">الفرع التابع له</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-outlined-label"
+                                    id="demo-simple-select-outlined"
+                                    value={employmentBranchId}
+                                    onChange={handleEmploymentBranchIdChange}
+                                    label="CategoryId"
+                                >
+                                    <MenuItem value="">
+                                        <em>None</em>
+                                    </MenuItem>
+                                    {branches.map((branch: TBranch) => (
+                                        <MenuItem key={branch.id} value={branch.id}>{branch?.arBranchName}</MenuItem>
 
-                                ))}
-                            </Select>
-                        </FormControl>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            :
+                            <>{(!isLoadingBranches && branches.length > 0) && branches.map((branch: TBranch) => (employmentBranchId == branch.id && (
+                                <TextField
+                                    className={classes.textField}
+                                    required
+                                    multiline
+                                    fullWidth
+                                    id="outlined-required"
+                                    label="الفرع التابع له"
+                                    variant={"outlined"}
+                                    InputProps={{
+                                        readOnly: true
+                                    }}
+                                    type="text"
+                                    value={branch.arBranchName}
+                                />
+                                // <Typography className={classes.branchName} variant="body1" component="h2"> {branch.arBranchName}</Typography >
+                            )))}</>
+                        }
+
                     </Grid>
-                    {mode !== UI_FROM_MODE.VIEW && < Grid item xs={6}>
+                    {(mode === UI_FROM_MODE.EDIT_PASSWORD || mode === UI_FROM_MODE.NEW) && < Grid item xs={6}>
                         <TextField
                             className={classes.textField}
                             required
                             multiline
                             fullWidth
                             id="outlined-required"
-                            label="كلمة المرور"
+                            label={mode === UI_FROM_MODE.EDIT_PASSWORD ? "كلمة المرور الجديدة" : "كلمة المرور"}
                             variant={"standard"}
                             // variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
                             // InputProps={{

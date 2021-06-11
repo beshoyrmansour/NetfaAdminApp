@@ -1,7 +1,7 @@
 import axios from "../../api/axios";
-import { TProduct, IGetSingleOrderItemsProductsReq, IToggleProductsReq, IDeleteProductsBulkReq, IDeleteProductReq, ProductsActionTypes, IAddNewProductsReq, IEditProductsReq } from "../../models/Products";
+import { IGetSingleOrderItemsProductsReq, IToggleProductsReq, IDeleteProductsBulkReq, IDeleteProductReq, ProductsActionTypes, IAddNewProductsReq, IEditProductsReq } from "../../models/Products";
 import END_POINTS from '../../api/endPoints';
-import { TOGGLE_MODES, UI_FROM_MODE } from "../../models/configs";
+import { TOGGLE_MODES } from "../../models/configs";
 
 export const getSingleOrderItemsProducts: IGetSingleOrderItemsProductsReq = (AvailableForPurchaseOnly, PageNumber, PageSize, OrderBy) => {
     return axios.get(END_POINTS.SINGLE_ORDER_ITEMS)

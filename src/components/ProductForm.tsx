@@ -165,7 +165,6 @@ const ProductForm = (props: Props) => {
         setMainImageBas64(btoa(binaryString))
     }
     const handleThumbnailLinkChange = (event: any) => {
-        let reader = new FileReader();
         if (event.target.files.length && event.target.files[0].size < 5242880) {
             const imageFileURL = URL.createObjectURL(event.target.files[0]);
             const reader = new FileReader();

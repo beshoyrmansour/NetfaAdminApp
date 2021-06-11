@@ -1,50 +1,90 @@
+import { AxiosResponse } from "axios";
+import { TBranch } from "./Branches";
 
-export type Location = {
-    lng: string,
-    lat: string,
+export type TUser = {
+    id?: number;
+    phoneNumber: string;
+    name: string;
+    email: string;
+    password: string;
 }
-
-export type Address = {
-    country: string,
-    city: string,
-    name: string,
-    buldingNumber: string,
-    unitNumber: string,
-    location: Location
+export interface TEmployee extends TUser {
+    employmentBranchId: TBranch['id'];
 }
-
-export type User = {
-    id: string,
-    name: string,
-    email: string,
-    mobile: string,
-    addresses: Address,
-
+export interface TCustomer extends TUser {
+    // orders?: TOrders[];
 }
 
 export enum UsersActionTypes {
-    FETCH_ALL_USERS = "USERS__FETCH_ALL_USERS",
-    FETCH_USER = "USERS__FETCH_USER",
-    ADD_USER = "USERS__ADD_USER",
-    REMOVE_USER = "USERS__REMOVE_USER",
-    UPDATE_USER = "USERS__UPDATE_USER",
-    SET_IS_LOADING_USERS = "USERS__SET_IS_LOADING_USERS",
+    FETCH_ALL_EMPLOYEES = "USERS__FETCH_ALL_EMPLOYEES",
+    FETCH_EMPLOYEE = "USERS__FETCH_EMPLOYEE",
+    ADD_EMPLOYEE = "USERS__ADD_EMPLOYEE",
+    SET_SELECTED_EMPLOYEE = "USERS__SET_SELECTED_EMPLOYEE",
+    REMOVE_EMPLOYEE = "USERS__REMOVE_EMPLOYEE",
+    UPDATE_EMPLOYEE = "USERS__UPDATE_EMPLOYEE",
+    SET_IS_LOADING_EMPLOYEES = "USERS__SET_IS_LOADING_EMPLOYEES",
+
+    FETCH_ALL_CUSTOMERS = "USERS__FETCH_ALL_CUSTOMERS",
+    FETCH_CUSTOMER = "USERS__FETCH_CUSTOMER",
+    ADD_CUSTOMER = "USERS__ADD_CUSTOMER",
+    SET_SELECTED_CUSTOMER = "USERS__SET_SELECTED_CUSTOMER",
+    REMOVE_CUSTOMER = "USERS__REMOVE_CUSTOMER",
+    UPDATE_CUSTOMER = "USERS__UPDATE_CUSTOMER",
+    SET_IS_LOADING_CUSTOMERS = "USERS__SET_IS_LOADING_CUSTOMERS",
 }
 
+export type UsersActionType = {
+    type: UsersActionTypes;
+    payload?: any;
+};
 
+export interface IGetSingleOrderItemsEmployeesReq {
+    (
+        AvailableForPurchaseOnly?: boolean,
+        PageNumber?: number,
+        PageSize?: number,
+        OrderBy?: string,
+    ): Promise<AxiosResponse>
+}
 
-// Action Generator for ADD
-export const addProductType = (user: User) => {
+export const removeEmployeeType = (employee: TEmployee) => {
     return {
-        type: UsersActionTypes.ADD_USER,
-        payload: user
+        type: UsersActionTypes.REMOVE_EMPLOYEE,
+        payload: employee
     };
 };
 
-// Action Generator for Remove
-export const removeProductType = (user: User) => {
-    return {
-        type: UsersActionTypes.REMOVE_USER,
-        payload: user
-    };
+export type UsersReducerType = {
+    employees: TEmployee[],
+    selectedEmployee: TEmployee | {},
+    isLoadingSelectedEmployee: boolean,
+    isLoadingEmployees: boolean,
+
+    customers: TCustomer[],
+    selectedCustomer: TCustomer | {},
+    isLoadingSelectedCustomer: boolean,
+    isLoadingCustomers: boolean,
 };
+
+export interface IAddNewEmployeesReq {
+    (EmployeeData: TEmployee): Promise<AxiosResponse>
+}
+export interface IEditEmployeesReq {
+    (
+        EmployeeData: TEmployee, employeeId: string
+    ): Promise<AxiosResponse>
+}
+export interface IToggleEmployeesReq {
+    (
+        porductIds: number[],
+        employeeIsAvailableForPurchase: boolean
+    ): Promise<AxiosResponse>
+}
+
+export interface IDeleteEmployeeReq {
+    (employeeId: number): Promise<AxiosResponse>
+}
+
+export interface IDeleteEmployeesBulkReq {
+    (employeeIds: string[]): Promise<AxiosResponse>
+}

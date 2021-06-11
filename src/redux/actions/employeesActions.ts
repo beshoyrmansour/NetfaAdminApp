@@ -1,5 +1,5 @@
 import axios from "../../api/axios";
-import { TEmployee, IGetSingleOrderItemsEmployeesReq, IToggleEmployeesReq, IDeleteEmployeesBulkReq, IDeleteEmployeeReq, EmployeesActionTypes, IAddNewEmployeesReq, IEditEmployeesReq } from "../../models/Employees";
+import { IGetSingleOrderItemsEmployeesReq, IToggleEmployeesReq, IDeleteEmployeesBulkReq, IDeleteEmployeeReq, UsersActionTypes, IAddNewEmployeesReq, IEditEmployeesReq } from "../../models/Users";
 import END_POINTS from '../../api/endPoints';
 import { TOGGLE_MODES, UI_FROM_MODE } from "../../models/configs";
 
@@ -44,7 +44,7 @@ export const loadEmployeesList: (dispatch: any) => void = (dispatch) => {
     getEmployees().then((res) => {
         if (res.status === 200) {
             dispatch({
-                type: EmployeesActionTypes.FETCH_ALL_EMPLOYEES,
+                type: UsersActionTypes.FETCH_ALL_EMPLOYEES,
                 payload: res.data.employees
             })
         }

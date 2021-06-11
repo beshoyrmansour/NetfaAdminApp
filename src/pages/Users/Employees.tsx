@@ -26,11 +26,12 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 // import FilterListIcon from '@material-ui/icons/FilterList';
 
-import { TEmployee, EmployeesActionTypes } from '../../models/Employees';
+import { TEmployee, UsersActionTypes } from '../../models/Users';
 import EmployeeForm from '../../components/users/EmployeeForm';
 import { UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
@@ -172,8 +173,8 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     const classes = useToolbarStyles();
     const dispatch = useDispatch();
 
-    const isLoadingEmployees = useSelector((state: AppState) => state.employees.isLoadingEmployees);
-    const employees = useSelector((state: AppState) => state.employees.employees);
+    const isLoadingEmployees = useSelector((state: AppState) => state.users.isLoadingEmployees);
+    const employees = useSelector((state: AppState) => state.users.employees);
 
     const { selectedIds } = props;
     const [openEmployeeForm, setOpenEmployeeForm] = useState(false);
@@ -311,8 +312,8 @@ export default function Employees() {
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const [fromMode, setFromMode] = useState(UI_FROM_MODE.NEW);
-    const isLoadingEmployees = useSelector((state: AppState) => state.employees.isLoadingEmployees);
-    const employees = useSelector((state: AppState) => state.employees.employees);
+    const isLoadingEmployees = useSelector((state: AppState) => state.users.isLoadingEmployees);
+    const employees = useSelector((state: AppState) => state.users.employees);
 
 
     const [confirmDialogMessage, setConfirmDialogMessage] = React.useState<string>('');
@@ -374,7 +375,7 @@ export default function Employees() {
     };
     const handleOpenEmployeeFormOnClick = (employee: TEmployee, mode: UI_FROM_MODE) => {
         dispatch({
-            type: EmployeesActionTypes.SET_SELECTED_EMPLOYEE,
+            type: UsersActionTypes.SET_SELECTED_EMPLOYEE,
             payload: employee
         })
         setFromMode(mode)
@@ -394,7 +395,7 @@ export default function Employees() {
 
     React.useEffect(() => {
         dispatch({
-            type: EmployeesActionTypes.SET_IS_LOADING_EMPLOYEES,
+            type: UsersActionTypes.SET_IS_LOADING_EMPLOYEES,
             payload: true
         })
         loadEmployeesList(dispatch);
@@ -403,12 +404,12 @@ export default function Employees() {
 
     const handleDeleteEmployee: (employee: TEmployee) => void = (employee) => {
         setConfirmDialogTitle(`هل أنت متأكد`);
-        setConfirmDialogMessage(`هل تريد حذف المنتج "${employee.name}"  من قائمة الموظفين`);
+        setConfirmDialogMessage(`هل تريد حذف الموظف "${employee.name}"  من قائمة الموظفين`);
         setConfirmDialogSubmit(`حذف`);
         setOpenConfirmDialog(true);
         const _deleteEmployee: () => void = () => {
             dispatch({
-                type: EmployeesActionTypes.SET_IS_LOADING_EMPLOYEES,
+                type: UsersActionTypes.SET_IS_LOADING_EMPLOYEES,
                 payload: true
             });
             deleteEmployee(employee.id as number).then(() => {
@@ -421,6 +422,32 @@ export default function Employees() {
         }
         setOnSubmit((prev) => _deleteEmployee)
     }
+
+
+
+
+    // const handleChangeEmployeePassword: (employee: TEmployee) => void = (employee) => {
+    //     setConfirmDialogTitle(`هل أنت متأكد`);
+    //     setConfirmDialogMessage(`برجاء كتابة المة المرور الجديدة للموظف "${employee.name}"`);
+    //     setConfirmDialogSubmit(`تغيير`);
+    //     setOpenConfirmDialog(true);
+    //     const _changeEmployeePassword: () => void = () => {
+    //         dispatch({
+    //             type: UsersActionTypes.SET_IS_LOADING_EMPLOYEES,
+    //             payload: true
+    //         });
+    //         changeEmployeePassword(employee.id as number).then(() => {
+    //             loadEmployeesList(dispatch);
+    //             setOpenConfirmDialog(false);
+    //             setConfirmDialogTitle('');
+    //             setConfirmDialogMessage('');
+    //             setConfirmDialogSubmit('');
+    //         })
+    //     }
+    //     setOnSubmit((prev) => _changeEmployeePassword)
+    // }
+
+
     const handleConfirmDialogCancel: () => void = () => {
         setOpenConfirmDialog(false);
     }
@@ -487,6 +514,11 @@ export default function Employees() {
                                                                 <Tooltip title={"حذف"}>
                                                                     <IconButton aria-label={"حذف"} onClick={() => handleDeleteEmployee(row)}>
                                                                         <DeleteIcon color="primary" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                                <Tooltip title={"تغيير كلمة المرور"}>
+                                                                    <IconButton aria-label={"تغيير كلمة المرور"} onClick={() => handleOpenEmployeeFormOnClick(row, UI_FROM_MODE.EDIT_PASSWORD)}>
+                                                                        <VpnKeyIcon color="primary" />
                                                                     </IconButton>
                                                                 </Tooltip>
                                                                 <Tooltip title="تعديل">
