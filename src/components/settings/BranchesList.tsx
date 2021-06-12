@@ -39,11 +39,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 
 
-interface Props {
-
-}
-
-const BranchesList = (props: Props) => {
+const BranchesList = () => {
     const classes = useStyles();
     const dispatch = useDispatch();
 
@@ -113,7 +109,7 @@ const BranchesList = (props: Props) => {
 
     }
     const handleConfirmDialogCancel: () => void = () => {
-       setOpenConfirmDialog(false);
+        setOpenConfirmDialog(false);
     }
     const handleOpenBranchesDetailsFormOnClick = (branch: TBranch, mode: UI_FROM_MODE) => {
         dispatch({

@@ -1,10 +1,8 @@
 import React from 'react';
-import { AxiosResponse } from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Drawer from '@material-ui/core/Drawer';
-import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
@@ -22,7 +20,7 @@ import ImageIcon from '@material-ui/icons/Image';
 import CardMedia from '@material-ui/core/CardMedia';
 
 import { makeStyles, Theme } from '@material-ui/core/styles';
-import { addNewCategory, getCategoriesList, editCategory, loadCategoriesList } from '../../redux/actions/categoriesActions';
+import { addNewCategory, editCategory, loadCategoriesList } from '../../redux/actions/categoriesActions';
 import { SettingActionTypes } from '../../models/Settings';
 import { UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
@@ -56,7 +54,6 @@ const CategoryDetailsForm = (props: Props) => {
 
     const { open, handleClose, mode } = props;
     const selectedCategory = useSelector((state: AppState) => state.settings.selectedCategory);
-    const isLoadingSelectedCategory = useSelector((state: AppState) => state.settings.isLoadingSelectedCategory);
 
     const [enName, setEnName] = React.useState<string>(selectedCategory.enName || '');
     const [arName, setArName] = React.useState<string>(selectedCategory.arName || '');

@@ -2,8 +2,6 @@ import React from 'react';
 import { create } from 'jss';
 import rtl from 'jss-rtl';
 import { StylesProvider, jssPreset } from '@material-ui/core/styles';
-import { makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Container from '@material-ui/core/Container';
 
@@ -14,22 +12,6 @@ import Products from './pages/products/Products';
 import Orders from './pages/Orders';
 import Users from './pages/Users/Users';
 import Settings from './pages/Settings';
-
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    flexGrow: 1,
-    justifyContent: 'center'
-    // backgroundColor: theme.palette.background.paper,
-  },
-
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-    color: theme.palette.text.secondary,
-  },
-}));
 
 function TabPanel(props: any) {
   const { children, value, index, ...other } = props;
@@ -52,7 +34,6 @@ function TabPanel(props: any) {
 }
 
 function App() {
-  const classes = useStyles();
   const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
 
   const [value, setValue] = React.useState(0);

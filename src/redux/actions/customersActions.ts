@@ -1,7 +1,7 @@
 import axios from "../../api/axios";
 import { IGetCustomersReq, IToggleCustomersReq, IDeleteCustomersBulkReq, IDeleteCustomerReq, UsersActionTypes, IAddNewCustomersReq, IEditCustomersReq } from "../../models/Users";
 import END_POINTS from '../../api/endPoints';
-import { TOGGLE_MODES, UI_FROM_MODE } from "../../models/configs";
+import { TOGGLE_MODES } from "../../models/configs";
 
 export const getCustomers: IGetCustomersReq = (PageNumber, PageSize, OrderBy) => {
     return axios.get(END_POINTS.CUSTOMERS)

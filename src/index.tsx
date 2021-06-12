@@ -8,9 +8,6 @@ import './index.css';
 import store from './redux/store';
 import { Provider } from 'react-redux';
 
-// define app context
-const AppContext = React.createContext(null);
-
 ReactDOM.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>

@@ -48,7 +48,6 @@ const QuantityDetailsForm = (props: Props) => {
     } = props;
 
     const selectedQuantity = useSelector((state: AppState) => state.settings.selectedQuantity);
-    const isLoadingSelectedQuantity = useSelector((state: AppState) => state.settings.isLoadingSelectedQuantity);
 
     const [enName, setEnName] = React.useState<string>('');
     const [arName, setArName] = React.useState<string>('');

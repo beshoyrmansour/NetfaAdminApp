@@ -10,17 +10,13 @@ import IconButton from '@material-ui/core/IconButton';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
 
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { addNewEmploye, loadCustomersList, editCustomer } from '../../redux/actions/customersActions';
 import { SettingActionTypes } from '../../models/Settings';
 import { UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
-import { BranchesActionTypes, TBranch } from '../../models/Branches';
+import { BranchesActionTypes } from '../../models/Branches';
 import { loadBranchesList } from '../../redux/actions/branchActions';
 
 
@@ -55,9 +51,6 @@ const CustomerForm = (props: Props) => {
 
     const { open, handleClose, mode } = props;
     const selectedCustomer = useSelector((state: AppState) => state.users.selectedCustomer);
-    const isLoadingSelectedCustomer = useSelector((state: AppState) => state.users.isLoadingSelectedCustomer);
-    const branches = useSelector((state: AppState) => state.settings.branches);
-    const isLoadingBranches = useSelector((state: AppState) => state.settings.isLoadingBranches);
 
     const [email, setEmail] = React.useState<string>(selectedCustomer.email || '');
     const [name, setName] = React.useState<string>(selectedCustomer.name || '');
@@ -236,15 +229,10 @@ const CustomerForm = (props: Props) => {
                             id="outlined-required"
                             label={mode === UI_FROM_MODE.EDIT_PASSWORD ? "كلمة المرور الجديدة" : "كلمة المرور"}
                             variant={"standard"}
-                            // variant={mode === UI_FROM_MODE.VIEW ? "outlined" : "standard"}
-                            // InputProps={{
-                            //     readOnly: mode === UI_FROM_MODE.VIEW,
-                            // }}
                             type="passoword"
                             value={password}
                             onChange={handlePasswordChange}
                             helperText="الحد الادني 8 حروف او ارقام"
-
                         />
                     </Grid>}
 

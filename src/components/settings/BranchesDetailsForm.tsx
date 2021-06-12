@@ -7,7 +7,6 @@ import { AppState } from '../../redux/store';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Drawer from '@material-ui/core/Drawer';
-import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
@@ -16,16 +15,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import Avatar from '@material-ui/core/Avatar';
-import ImageIcon from '@material-ui/icons/Image';
-import CardMedia from '@material-ui/core/CardMedia';
 import { BranchesActionTypes, TAddress, TBranch } from '../../models/Branches';
-import { addNewBranch, editBranch, getBranchesList, loadBranchesList } from '../../redux/actions/branchActions';
-import { AxiosResponse } from 'axios';
+import { addNewBranch, editBranch, loadBranchesList } from '../../redux/actions/branchActions';
 import AddressForm from './AddressForm';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -73,7 +64,6 @@ const BranchesDetailsForm = (props: Props) => {
 
     const { open, handleClose, mode } = props;
     const selectedBranch = useSelector((state: AppState) => state.settings.selectedBranch as TBranch);
-    const isLoadingSelectedBranch = useSelector((state: AppState) => state.settings.isLoadingSelectedBranch);
 
     const [enName, setEnName] = React.useState<string>(selectedBranch.enBranchName || '');
     const [arName, setArName] = React.useState<string>(selectedBranch.arBranchName || '');
@@ -124,7 +114,7 @@ const BranchesDetailsForm = (props: Props) => {
                     loadBranchesList(dispatch)
                     formCleanUpAndClose();
                 })
-                break; break;
+                break;
 
             default:
                 break;
@@ -133,8 +123,8 @@ const BranchesDetailsForm = (props: Props) => {
 
     React.useEffect(() => {
 
-        console.log({useEffectaddress:address});
-        
+        console.log({ useEffectaddress: address });
+
         setIsFormValid(enName !== '' &&
             isAddressFormValid &&
             arName !== '')

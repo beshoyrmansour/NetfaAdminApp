@@ -23,7 +23,6 @@ import { AppState } from '../redux/store';
 import { createOrUpdateBundleProduct, deleteProduct, loadBundleProducts, toggleProducts } from '../redux/actions/bundlesActions';
 import { TCategory } from '../models/Categories';
 import { getCategoriesList } from '../redux/actions/categoriesActions';
-import { getQuantitiesList } from '../redux/actions/settingActions';
 import ConfirmDialog from './ConfirmDialog';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityIcon from '@material-ui/icons/Visibility';

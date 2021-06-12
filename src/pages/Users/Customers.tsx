@@ -17,14 +17,9 @@ import Typography from '@material-ui/core/Typography';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import TablePagination from '@material-ui/core/TablePagination';
-import Avatar from '@material-ui/core/Avatar';
-import ImageIcon from '@material-ui/icons/Image';
-import CardMedia from '@material-ui/core/CardMedia';
 
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import EditIcon from '@material-ui/icons/Edit';
@@ -36,7 +31,7 @@ import CustomerForm from '../../components/users/CustomerForm';
 import { UI_FROM_MODE } from '../../models/configs';
 import { AppState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { toggleCustomers, deleteCustomer, loadCustomersList } from '../../redux/actions/customersActions';
+import { deleteCustomer, loadCustomersList } from '../../redux/actions/customersActions';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import ConfirmDialog from '../../components/ConfirmDialog';
 

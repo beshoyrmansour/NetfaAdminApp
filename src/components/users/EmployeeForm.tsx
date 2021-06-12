@@ -55,7 +55,6 @@ const EmployeeForm = (props: Props) => {
 
     const { open, handleClose, mode } = props;
     const selectedEmployee = useSelector((state: AppState) => state.users.selectedEmployee);
-    const isLoadingSelectedEmployee = useSelector((state: AppState) => state.users.isLoadingSelectedEmployee);
     const branches = useSelector((state: AppState) => state.settings.branches);
     const isLoadingBranches = useSelector((state: AppState) => state.settings.isLoadingBranches);
 
