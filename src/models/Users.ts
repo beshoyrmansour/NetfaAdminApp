@@ -38,14 +38,6 @@ export type UsersActionType = {
     payload?: any;
 };
 
-export interface IGetSingleOrderItemsEmployeesReq {
-    (
-        AvailableForPurchaseOnly?: boolean,
-        PageNumber?: number,
-        PageSize?: number,
-        OrderBy?: string,
-    ): Promise<AxiosResponse>
-}
 
 export const removeEmployeeType = (employee: TEmployee) => {
     return {
@@ -66,6 +58,14 @@ export type UsersReducerType = {
     isLoadingCustomers: boolean,
 };
 
+// EMPLOYEEs
+export interface IGetEmployeesReq {
+    (
+        PageNumber?: number,
+        PageSize?: number,
+        OrderBy?: string,
+    ): Promise<AxiosResponse>
+}
 export interface IAddNewEmployeesReq {
     (EmployeeData: TEmployee): Promise<AxiosResponse>
 }
@@ -87,4 +87,36 @@ export interface IDeleteEmployeeReq {
 
 export interface IDeleteEmployeesBulkReq {
     (employeeIds: string[]): Promise<AxiosResponse>
+}
+
+
+// CUSTOMERs
+export interface IGetCustomersReq {
+    (
+        PageNumber?: number,
+        PageSize?: number,
+        OrderBy?: string,
+    ): Promise<AxiosResponse>
+}
+export interface IAddNewCustomersReq {
+    (CustomerData: TCustomer): Promise<AxiosResponse>
+}
+export interface IEditCustomersReq {
+    (
+        CustomerData: TCustomer, CustomerId: string
+    ): Promise<AxiosResponse>
+}
+export interface IToggleCustomersReq {
+    (
+        porductIds: number[],
+        CustomerIsAvailableForPurchase: boolean
+    ): Promise<AxiosResponse>
+}
+
+export interface IDeleteCustomerReq {
+    (CustomerId: number): Promise<AxiosResponse>
+}
+
+export interface IDeleteCustomersBulkReq {
+    (CustomerIds: string[]): Promise<AxiosResponse>
 }

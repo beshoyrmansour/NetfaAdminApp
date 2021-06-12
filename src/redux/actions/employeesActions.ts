@@ -1,9 +1,9 @@
 import axios from "../../api/axios";
-import { IGetSingleOrderItemsEmployeesReq, IToggleEmployeesReq, IDeleteEmployeesBulkReq, IDeleteEmployeeReq, UsersActionTypes, IAddNewEmployeesReq, IEditEmployeesReq } from "../../models/Users";
+import { IGetEmployeesReq, IToggleEmployeesReq, IDeleteEmployeesBulkReq, IDeleteEmployeeReq, UsersActionTypes, IAddNewEmployeesReq, IEditEmployeesReq } from "../../models/Users";
 import END_POINTS from '../../api/endPoints';
 import { TOGGLE_MODES, UI_FROM_MODE } from "../../models/configs";
 
-export const getEmployees: IGetSingleOrderItemsEmployeesReq = (AvailableForPurchaseOnly, PageNumber, PageSize, OrderBy) => {
+export const getEmployees: IGetEmployeesReq = (PageNumber, PageSize, OrderBy) => {
     return axios.get(END_POINTS.EMPLOYEES)
 }
 
